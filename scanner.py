@@ -16,8 +16,7 @@ reserved = {
     'print': 'PRINT'
 }
 
-tokens = [
-             'DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV', 'FLOATNUM', 'INTNUM', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN',
+tokens = ['DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV', 'FLOATNUM', 'INTNUM', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN',
              'DIVASSIGN', 'LESSEQ', 'MOREEQ', 'NOTEQ', 'EQUAL', 'STRING', 'ID'] + list(reserved.values())
 
 t_DOTADD = r'\.\+'
