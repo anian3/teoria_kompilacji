@@ -2,17 +2,19 @@
 
 import scanner
 import ply.yacc as yacc
+from matrix_operations import *
 
 tokens = scanner.tokens
 
-
 # Zasady parsingu
 precedence = (
+    ("nonassoc", 'IF'),
+    ("nonassoc", 'ELSE'),
     ("nonassoc", '=', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN', '<', '>', 'LESSEQ', 'MOREEQ', 'NOTEQ',
      'EQUAL'),
     ("nonassoc", ':'),
     ("left", '+', '-', 'DOTADD', 'DOTSUB'),
-    ("left", 'DOTADD', 'DOTDIV', '*', '/'),
+    ("left", 'DOTMUL', 'DOTDIV', '*', '/'),
     ("right", 'UMINUS'),
     ("left", '(', ')', '[', ']', '{', '}')
 )
@@ -119,7 +121,6 @@ def p_expression_transpose(p):
     p[0] = matrix_transpose(p[1])
 
 
-
 # 5. Inicjalizacja macierzy konkretnymi wartościami
 def p_matrix_initialization(p):
     """ expression : '[' matrix_rows ']' """
@@ -127,23 +128,28 @@ def p_matrix_initialization(p):
 
 
 def p_matrix_rows(p):
-    """matrix_rows :  matrix_row_values  """
+    """ matrix_rows :  matrix_row  """
     p[0] = [p[1]]
 
 
 def p_matrix_rows_multiple(p):
-    """matrix_rows : matrix_rows ',' matrix_row_values """
+    """ matrix_rows : matrix_rows ',' matrix_row """
     p[0] = p[1] + [p[3]]
 
 
+def p_matrix_row(p):
+    """ matrix_row : '['  matrix_row_values ']' """
+    p[0] = p[2]
+
+
 def p_matrix_row_values(p):
-    """matrix_row_values : matrix_row_values ',' expression
-                            | matrix_row_values
-                             | expression """
-    if len(p) == 2:
-        p[0] = [p[1]]
-    else:
-        p[0] = p[1] + [p[3]]
+    """  matrix_row_values : expression """
+    p[0] = [p[1]]
+
+
+def p_matrix_row_values_multiple(p):
+    """ matrix_row_values : matrix_row_values ',' expression """
+    p[0] = p[1] + [p[3]]
 
 
 # 6. Macierzowe funkcje specjalne
@@ -243,58 +249,10 @@ def p_expression_group(p):
 # 13. Tablice oraz ich zakresy
 def p_expression_range(p):
     """ expression : INTNUM ':' INTNUM """
-    p[0] = [i for i in range(p[1], p[3]+1)]
+    p[0] = [i for i in range(p[1], p[3] + 1)]
 
 
 # 14. Pozostałe
-
-# funkcje pomocnicze
-
-def matrix_addition(A, B):
-    if isinstance(A, list) and isinstance(B, list):
-        if len(A) != len(B) or len(A[0]) != len(B[0]):
-            raise ValueError("Dodawanie element po elemencie na różnych rozmiarach macierzy.")
-        return [[A[i][j] + B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
-    else:
-        raise ValueError("Dodawanie macierzowe wykonywane nie na macierzach.")
-
-
-def matrix_substraction(A, B):
-    if isinstance(A, list) and isinstance(B, list):
-        if len(A) != len(B) or len(A[0]) != len(B[0]):
-            raise ValueError("Odejmowanie element po elemencie na różnych rozmiarach macierzy.")
-        return [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
-    else:
-        raise ValueError("Odejmowanie macierzowe wykonywane nie na macierzach.")
-
-
-def matrix_multiplication(A, B):
-    if isinstance(A, list) and isinstance(B, list):
-        if len(A) != len(B) or len(A[0]) != len(B[0]):
-            raise ValueError("Mnożenie element po elemencie na różnych rozmiarach macierzy.")
-        return [[A[i][j] * B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
-    else:
-        raise ValueError("Mnożenie macierzowe wykonywane nie na macierzach.")
-
-
-def matrix_division(A, B):
-    if isinstance(A, list) and isinstance(B, list):
-        if len(A) != len(B) or len(A[0]) != len(B[0]):
-            raise ValueError("Dzielenie element po elemencie na różnych rozmiarach macierzy.")
-        for i in range(len(B)):
-            for j in range(len(B[0])):
-                if B[i][j] == 0:
-                    raise ValueError("Dzielenie przez zero.")
-        return [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
-    else:
-        raise ValueError("Odejmowanie macierzowe wykonywane nie na macierzach.")
-
-
-def matrix_transpose(A):
-    if isinstance(A, list):
-        return [[row[i] for row in A] for i in range(len(A[0]))]
-    else:
-        raise ValueError("Transpozycja wykonywana nie dla macierzy.")
 
 
 parser = yacc.yacc()
