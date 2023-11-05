@@ -271,10 +271,12 @@ def p_expression_range(p):
 
 def p_table(p):
     """ expression : expression ',' expression addrow """
+    p[0] = [p[1], p[3]]
 
 
 def p_addrow(p):
     """ addrow : ',' expression """
+    p[0] = p[2]
 
 
 parser = yacc.yacc()
