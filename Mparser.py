@@ -34,6 +34,9 @@ def p_error(p):
 # Początek
 def p_start(p):
     """ statement : expression ';' statement
+                    | '{' statement '}' statement
+                    | loop statement
+                    | condition statement
                     | """
     pass
 
@@ -41,7 +44,7 @@ def p_start(p):
 # 0.
 def p_expression_id(p):
     """ expression : ID """
-    print('Calling id: ' + p[1])
+    # print('Calling id: ' + p[1])
     if p[1] in names:
         p[0] = names[p[1]]
     else:
@@ -117,8 +120,10 @@ def p_expression_uminus(p):
 
 # 4. Transpozycja macierzy
 def p_expression_transpose(p):
-    """ expression : "'" expression """
-    p[0] = matrix_transpose(p[1])
+    """ expression : ID "'" """
+    if p[1] not in names:
+        raise SyntaxError("Unknown matrix id")
+    p[0] = matrix_transpose(names[p[1]])
 
 
 # 5. Inicjalizacja macierzy konkretnymi wartościami
@@ -183,7 +188,7 @@ def p_expression_matrix_values(p):
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
     """ expression : ID '=' expression """
-    print('New id: ' + p[1])
+    # print('New id: ' + p[1])
     names[p[1]] = p[3]
 
 
@@ -204,26 +209,36 @@ def p_expression_assign(p):
 
 # 8. Instrukcja warunkowa if-else
 def p_expression_if(p):
-    """ expression : IF '(' expression ')' '{' statement '}' ELSE '{' expression '}' """
-    if p[2]:
-        p[0] = p[3]
-    else:
-        p[0] = p[5]
+    """ condition : IF expression statement ifx
+                    | IF '(' expression ')' statement ifx """
+
+
+def p_expression_ifx(p):
+    """ ifx : ELSE statement
+            | ELSE IF expression ifx
+            | ELSE IF '(' expression ')' ifx
+            | statement """
+    p[0] = p[1]
 
 
 # 9. Pętle while i for
 # 10. Instrukcje break, continue, return
 def p_expression_loop(p):
-    """ expression : FOR ID '=' INTNUM ':' INTNUM statement
-                    | WHILE '(' expression ')' statement
-                     | '{' statement '}'"""
+    """ loop : FOR ID '=' range inloop
+                    | WHILE '(' expression ')' inloop """
     p[0] = p[3]
 
 
+def p_inloop(p):
+    """ inloop : '{' statement '}'
+                | statement """
+
+def p_inloop_extra(p):
+    """ expression : BREAK statement
+                    | CONTINUE statement """
+
 def p_expression_extra(p):
-    """ expression : BREAK
-                    | CONTINUE
-                    | RETURN
+    """ expression : RETURN
                     | RETURN expression"""
     if len(p) == 3:
         p[0] = p[2]
@@ -233,9 +248,9 @@ def p_expression_extra(p):
 
 # 11. Instrukcja print
 def p_expression_print(p):
-    """ expression : PRINT STRING """
+    """ expression : PRINT expression """
     p[0] = p[2]
-    print(p[2])
+    # print(p[2])
 
 
 # 12. Instrukcje złożone
@@ -248,11 +263,18 @@ def p_expression_group(p):
 
 # 13. Tablice oraz ich zakresy
 def p_expression_range(p):
-    """ expression : INTNUM ':' INTNUM """
-    p[0] = [i for i in range(p[1], p[3] + 1)]
+    """ range : INTNUM ':' INTNUM
+                    | ID ':' ID
+                    | ID ':' INTNUM
+                    | INTNUM ':' ID """
 
 
-# 14. Pozostałe
+def p_table(p):
+    """ expression : expression ',' expression addrow """
+
+
+def p_addrow(p):
+    """ addrow : ',' expression """
 
 
 parser = yacc.yacc()
