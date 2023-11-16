@@ -3,6 +3,7 @@
 import scanner
 import ply.yacc as yacc
 from matrix_operations import *
+from AST import *
 
 tokens = scanner.tokens
 
@@ -46,16 +47,23 @@ def p_expression_id(p):
     """ expression : ID """
     # print('Calling id: ' + p[1])
     if p[1] in names:
-        p[0] = names[p[1]]
+        p[0] = Variable(p[1], names[p[1]])
     else:
         raise SyntaxError("Unknown id")
 
 
-def p_expression_value(p):
-    """expression : STRING
-                    | INTNUM
-                    | FLOATNUM"""
-    p[0] = p[1]
+def p_expression_string(p):
+    """expression : STRING """
+    p[0] = String(p[1])
+
+def p_expression_int(p):
+    """expression : INTNUM """
+    p[0] = IntNum(p[1])
+
+
+def p_expression_float(p):
+    """expression : FLOATNUM"""
+    p[0] = FloatNum(p[1])
 
 
 # 1. Wyrażenia binarne (w tym macierzowe)
@@ -64,16 +72,7 @@ def p_expression_binop(p):
                       | expression '-' expression
                       | expression '*' expression
                       | expression '/' expression """
-    if p[2] == '+':
-        p[0] = p[1] + p[3]
-    elif p[1] == '-':
-        p[0] = - p[2]
-    elif p[2] == '-':
-        p[0] = p[1] - p[3]
-    elif p[2] == '*':
-        p[0] = p[1] * p[3]
-    elif p[2] == '/':
-        p[0] = p[1] / p[3]
+    p[0] = BinExpr(p[2], p[1], p[3])
 
 
 def p_expression_binop_matrix(p):
@@ -81,14 +80,7 @@ def p_expression_binop_matrix(p):
                    | expression DOTSUB expression
                    | expression DOTMUL expression
                    | expression DOTDIV expression """
-    if p[2] == '.+':
-        p[0] = matrix_addition(p[1], p[3])
-    elif p[2] == '.-':
-        p[0] = matrix_substraction(p[1], p[3])
-    elif p[2] == '.*':
-        p[0] = matrix_multiplication(p[1], p[3])
-    elif p[2] == './':
-        p[0] = matrix_division(p[1], p[3])
+    p[0] = MatExpr(p[2], p[1], p[3])
 
 
 # 2. Wyrażenia relacyjne
@@ -99,23 +91,13 @@ def p_expression_compare(p):
                     | expression NOTEQ expression
                     | expression LESSEQ expression
                     | expression EQUAL expression """
-
-    if p[2] == '>':
-        p[0] = p[1] > p[3]
-    elif p[2] == '<':
-        p[0] = p[1] < p[3]
-    elif p[2] == '==':
-        p[0] = p[1] == p[3]
-    elif p[2] == '>=':
-        p[0] = p[1] >= p[3]
-    else:
-        p[0] = p[1] <= p[3]
+    p[0] = CompExpression(p[2], p[1], p[3])
 
 
 # 3. Negacja unarna
 def p_expression_uminus(p):
     """expression : '-' expression %prec UMINUS"""
-    p[0] = -p[2]
+    p[0] = OneExpression(p[1], p[2])
 
 
 # 4. Transpozycja macierzy
@@ -123,7 +105,7 @@ def p_expression_transpose(p):
     """ expression : ID "'" """
     if p[1] not in names:
         raise SyntaxError("Unknown matrix id")
-    p[0] = matrix_transpose(names[p[1]])
+    p[0] = OneExpression(p[1], p[2])
 
 
 # 5. Inicjalizacja macierzy konkretnymi wartościami
@@ -264,9 +246,9 @@ def p_expression_group(p):
 # 13. Tablice oraz ich zakresy
 def p_expression_range(p):
     """ range : INTNUM ':' INTNUM
-                    | ID ':' ID
-                    | ID ':' INTNUM
-                    | INTNUM ':' ID """
+            | ID ':' ID
+            | ID ':' INTNUM
+            | INTNUM ':' ID """
 
 
 def p_table(p):
