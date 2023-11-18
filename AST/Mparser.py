@@ -33,12 +33,28 @@ def p_error(p):
 
 # Początek
 def p_start(p):
-    """ statement : expression ';' statement
-                    | '{' statement '}' statement
-                    | loop statement
-                    | condition statement
-                    | """
-    pass
+    """ start : statements """
+    p[0] = p[1]
+
+
+def p_statements(p):
+    """ statements : statement
+                   | statements statement """
+    if len(p) > 2:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = [p[1]]
+
+
+def p_statement(p):
+    """ statement : expression ';'
+                  | '{' statements '}'
+                  | loop
+                  | condition """
+    if len(p) == 3 and p[1] == '{':
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
 
 
 # 0.
@@ -54,6 +70,7 @@ def p_expression_id(p):
 def p_expression_string(p):
     """expression : STRING """
     p[0] = String(p[1])
+
 
 def p_expression_int(p):
     """expression : INTNUM """
@@ -200,6 +217,7 @@ def p_inloop(p):
     """ inloop : '{' statement '}'
                 | statement """
 
+
 def p_inloop_extra(p):
     """ expression : BREAK statement
                     | CONTINUE statement """
@@ -207,6 +225,7 @@ def p_inloop_extra(p):
         p[0] = BreakExpr()
     else:
         p[0] = ContinueExpr()
+
 
 def p_expression_extra(p):
     """ expression : RETURN
