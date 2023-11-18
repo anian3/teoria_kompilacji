@@ -1,15 +1,17 @@
 from dataclasses import dataclass
 from typing import Any
 
+
 class Node(object):
     pass
 
-# ZMIENNE
 
+# ZMIENNE
 @dataclass
 class IntNum(Node):
     """ Integer variable type """
     value: int
+
 
 @dataclass
 class FloatNum(Node):
@@ -26,7 +28,6 @@ class String(Node):
 @dataclass
 class Variable(Node):
     """ ID """
-    name: Any
     value: Any
 
 
@@ -56,13 +57,20 @@ class CompExpression(Node):
 
 
 @dataclass
-class OneExpression(Node):
-    """ Jednoelementowe wyrażenia: transpozycja macierzy i negacja unarna """
+class TransposeExpression(Node):
+    """ Transpozycja macierzy i negacja unarna """
     op: Any
     value: Any
 
 
- # INSTRUKCJE PRZYPISANIA
+@dataclass
+class UMinExpression(Node):
+    """ Negacja unarna """
+    op: Any
+    value: Any
+
+
+# INSTRUKCJE PRZYPISANIA
 @dataclass
 class AssignExpr(Node):
     op: Any
@@ -70,21 +78,58 @@ class AssignExpr(Node):
     right: Any
 
 
+@dataclass
+class MatrixInitFuncExpr(Node):
+    func: Any
+    size: int
+
+
 # INSTRUKCJE WARUNKOWE IF-ELSE
 
 # PĘTLE WHILE / FOR
 
+class ForLoopExpr(Node):
+    func = "FOR"
+    
+
+class WhileLoopExpr(Node):
+    func = "WHILE"
+
 # INSTRUKCJE: BREAK, CONTINUE, RETURN
+@dataclass
+class BreakExpr(Node):
+    func = "BREAK"
+
+
+@dataclass
+class ContinueExpr(Node):
+    func = "CONTINUE"
+
+
+@dataclass
+class ReturnExpr(Node):
+    func = "RETURN"
+    val: Any
+
 
 # INSTRUKCJE: PRINT
+@dataclass
+class PrintExpr(Node):
+    func = "PRINT"
+    val: Any
+
 
 # INSTRUKCJE ZŁOŻONE
 
 # TABLICE ORAZ ICH ZAKRESY
+@dataclass
+class RangeExpr(Node):
+    func = "RANGE"
+    startVal: Any
+    endVal: Any
 
 
 # ERROR
 class Error(Node):
     def __init__(self):
         pass
-      

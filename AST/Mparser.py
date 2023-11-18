@@ -2,7 +2,6 @@
 
 import scanner
 import ply.yacc as yacc
-from matrix_operations import *
 from AST import *
 
 tokens = scanner.tokens
@@ -47,7 +46,7 @@ def p_expression_id(p):
     """ expression : ID """
     # print('Calling id: ' + p[1])
     if p[1] in names:
-        p[0] = Variable(p[1], names[p[1]])
+        p[0] = Variable(p[1])
     else:
         raise SyntaxError("Unknown id")
 
@@ -97,7 +96,7 @@ def p_expression_compare(p):
 # 3. Negacja unarna
 def p_expression_uminus(p):
     """expression : '-' expression %prec UMINUS"""
-    p[0] = OneExpression(p[1], p[2])
+    p[0] = UMinExpression(p[1], p[2])
 
 
 # 4. Transpozycja macierzy
@@ -105,7 +104,7 @@ def p_expression_transpose(p):
     """ expression : ID "'" """
     if p[1] not in names:
         raise SyntaxError("Unknown matrix id")
-    p[0] = OneExpression(p[1], p[2])
+    p[0] = TransposeExpression(p[1], p[2])
 
 
 # 5. Inicjalizacja macierzy konkretnymi wartościami
@@ -144,24 +143,18 @@ def p_expression_matrix_special(p):
     """ expression : ZEROS '(' INTNUM ')'
                     | EYE '(' INTNUM ')'
                     | ONES '(' INTNUM ')' """
-    if p[0] == 'ZEROS':
-        p[0] = [[0 for _ in range(p[3])] for _ in range(p[3])]
-    elif p[0] == 'EYE':
-        p[0] = [[0 if i != j else 1 for i in range(p[3])] for j in range(p[3])]
-    elif p[0] == 'ONES':
-        p[0] = [[1 for _ in range(p[3])] for _ in range(p[3])]
+    p[0] = MatrixInitFuncExpr(p[1], p[3])
 
 
 def p_expression_matrix_set_values(p):
-    """ expression : ID '[' INTNUM ',' INTNUM ']' '=' expression """
+    """ expression : matrix_value '=' expression """
     if p[1] not in names:
         raise SyntaxError("Unknown matrix")
-    # names[p[1]][p[3]][p[5]] = p[8]
     p[0] = p[8]
 
 
 def p_expression_matrix_values(p):
-    """ expression : ID '[' INTNUM ',' INTNUM ']' """
+    """ matrix_value : ID '[' INTNUM ',' INTNUM ']' """
     if p[1] not in names:
         raise SyntaxError("Unknown matrix")
     p[0] = names[p[1]][p[3]][p[5]]
@@ -170,8 +163,7 @@ def p_expression_matrix_values(p):
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
     """ expression : ID '=' expression """
-    # print('New id: ' + p[1])
-    names[p[1]] = p[3]
+    p[0] = AssignExpr(p[2], p[1], p[3])
 
 
 def p_expression_assign(p):
@@ -179,14 +171,7 @@ def p_expression_assign(p):
                    | expression SUBASSIGN expression
                    | expression MULASSIGN expression
                    | expression DIVASSIGN expression """
-    if p[2] == '+=':
-        p[1] += p[3]
-    elif p[2] == '-=':
-        p[1] -= p[3]
-    elif p[2] == '*=':
-        p[1] *= p[3]
-    elif p[2] == '/=':
-        p[1] /= p[3]
+    p[0] = AssignExpr(p[2], p[1], p[3])
 
 
 # 8. Instrukcja warunkowa if-else
@@ -207,7 +192,7 @@ def p_expression_ifx(p):
 # 10. Instrukcje break, continue, return
 def p_expression_loop(p):
     """ loop : FOR ID '=' range inloop
-                    | WHILE '(' expression ')' inloop """
+              | WHILE '(' expression ')' inloop """
     p[0] = p[3]
 
 
@@ -218,21 +203,24 @@ def p_inloop(p):
 def p_inloop_extra(p):
     """ expression : BREAK statement
                     | CONTINUE statement """
+    if p[1] == "BREAK":
+        p[0] = BreakExpr()
+    else:
+        p[0] = ContinueExpr()
 
 def p_expression_extra(p):
     """ expression : RETURN
                     | RETURN expression"""
     if len(p) == 3:
-        p[0] = p[2]
+        p[0] = ReturnExpr(p[2])
     else:
-        pass
+        p[0] = ReturnExpr(None)
 
 
 # 11. Instrukcja print
 def p_expression_print(p):
     """ expression : PRINT expression """
-    p[0] = p[2]
-    # print(p[2])
+    p[0] = PrintExpr(p[2])
 
 
 # 12. Instrukcje złożone
@@ -249,6 +237,7 @@ def p_expression_range(p):
             | ID ':' ID
             | ID ':' INTNUM
             | INTNUM ':' ID """
+    p[0] = RangeExpr(p[1], p[3])
 
 
 def p_table(p):
