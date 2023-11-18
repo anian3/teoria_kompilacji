@@ -65,3 +65,47 @@ class TreePrinter:
         print("  " * indent + "-")
         self.left.printTree(indent + 1)
         self.right.printTree(indent + 1)
+
+    @addToClass(AST.MatrixInitFuncExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + str(self.func))
+        self.size.printTree(indent + 1)
+
+    @addToClass(AST.ForLoopExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+
+    @addToClass(AST.WhileLoopExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+
+    @addToClass(AST.BreakExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+
+    @addToClass(AST.ContinueExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+
+    @addToClass(AST.ReturnExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+        self.val.printTree(indent+1)
+
+    @addToClass(AST.PrintExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+        print(" " * (indent + 1) + str(self.val))
+
+    @addToClass(AST.RangeExpr)
+    def printTree(self, indent=0):
+        print(" " * indent + self.func)
+        self.startVal.printTree(indent + 1)
+        self.endVal.printTree(indent + 1)
+
+
+
+
+
+
+
