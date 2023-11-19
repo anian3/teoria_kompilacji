@@ -34,7 +34,8 @@ def p_error(p):
 # Początek
 def p_start(p):
     """ start : statements """
-    p[0] = p[1]
+    # p[0] = p[1]
+    p[0] = Program(p[1])
 
 
 def p_statements(p):
@@ -210,7 +211,10 @@ def p_expression_ifx(p):
 def p_expression_loop(p):
     """ loop : FOR ID '=' range inloop
               | WHILE '(' expression ')' inloop """
-    p[0] = p[3]
+    if p[1] == 'FOR':
+        p[0] = ForLoopExpr(p[2], p[4], p[5])
+    else:
+        p[0] = WhileLoopExpr(p[3], p[5])
 
 
 def p_inloop(p):

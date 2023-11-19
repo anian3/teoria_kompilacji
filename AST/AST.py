@@ -1,12 +1,18 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, List
 
 
 class Node(object):
     pass
 
 
+@dataclass
+class Program(Node):
+    statements: List[Any]
+
+
 # ZMIENNE
+
 @dataclass
 class IntNum(Node):
     """ Integer variable type """
@@ -28,7 +34,7 @@ class String(Node):
 @dataclass
 class Variable(Node):
     """ ID """
-    value: Any
+    value: str
 
 
 # WYRAŻENIA BINARNE
@@ -74,7 +80,8 @@ class UMinExpression(Node):
 @dataclass
 class AssignExpr(Node):
     op: Any
-    left: Any
+    # left: Any
+    left: str
     right: Any
 
 
@@ -87,13 +94,27 @@ class MatrixInitFuncExpr(Node):
 # INSTRUKCJE WARUNKOWE IF-ELSE
 
 # PĘTLE WHILE / FOR
+@dataclass
+class RangeExpr(Node):
+    func = "RANGE"
+    startVal: Any
+    endVal: Any
 
+
+@dataclass
 class ForLoopExpr(Node):
     func = "FOR"
-    
+    loop_variable: Any
+    range_expr: RangeExpr
+    body: Any
 
+
+@dataclass
 class WhileLoopExpr(Node):
     func = "WHILE"
+    condition: Any
+    body: Any
+
 
 # INSTRUKCJE: BREAK, CONTINUE, RETURN
 @dataclass
@@ -122,11 +143,6 @@ class PrintExpr(Node):
 # INSTRUKCJE ZŁOŻONE
 
 # TABLICE ORAZ ICH ZAKRESY
-@dataclass
-class RangeExpr(Node):
-    func = "RANGE"
-    startVal: Any
-    endVal: Any
 
 
 # ERROR
