@@ -81,6 +81,14 @@ class TreePrinter:
         print("  " * indent + str(self.func))
         self.condition.printTree(indent + 1)
         self.block.printTree(indent + 1)
+        self.ifx.printTree(indent)
+
+    @addToClass(AST.ElseIfExpr)
+    def printTree(self, indent=0):
+        print("  " * indent + str(self.func))
+        self.block.condition.printTree(indent + 1)
+        self.block.block.printTree(indent + 2)
+        self.block.ifx.printTree(indent)
 
     @addToClass(AST.ElseExpr)
     def printTree(self, indent=0):
@@ -97,7 +105,7 @@ class TreePrinter:
     @addToClass(AST.WhileLoopExpr)
     def printTree(self, indent=0):
         print("  " * indent + "WHILE")
-        print("  " * (indent + 1) + f"{self.condition}")
+        self.condition.printTree(indent + 1)
         self.body.printTree(indent + 2)
 
     @addToClass(AST.BreakExpr)

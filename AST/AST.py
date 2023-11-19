@@ -11,6 +11,7 @@ class Program(Node):
     statements: List[Any]
 
 
+
 # ZMIENNE
 
 @dataclass
@@ -96,10 +97,18 @@ class IfExpr(Node):
     func = "IF"
     condition: Any
     block: Any
+    ifx: Any
+
+
+@dataclass
+class ElseIfExpr(Node):
+    func: str
+    block: Any
+
 
 @dataclass
 class ElseExpr(Node):
-    func = "ELSE"
+    func: str
     block: Any
 
 

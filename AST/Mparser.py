@@ -188,20 +188,21 @@ def p_expression_assign(p):
 # 8. Instrukcja warunkowa if-else
 def p_expression_if(p):
     """ condition : IF expression statement ifx
-                    | IF '(' expression ')' statement ifx """
+                    | IF '(' expression ')' statements ifx """
     if len(p) < 5:
-        p[0] = IfExpr(p[1], p[2])
+        p[0] = IfExpr(p[1], p[2], p[3])
     else:
-        p[0] = IfExpr(p[2], p[4])
+        p[0] = IfExpr(p[2], p[3], p[4])
 
 
 def p_expression_ifx(p):
-    """ ifx : ELSE statement
-            | ELSE IF expression ifx
-            | ELSE IF '(' expression ')' ifx
-            | statement """
-    p[0] = ElseExpr(p[2])
-
+    """ ifx : ELSE condition
+            | ELSE statement
+            | """
+    if type(p[2]) == IfExpr:
+        p[0] = ElseIfExpr("ElSE IF", p[2])
+    else:
+        p[0] = ElseExpr("ELSE", p[2])
 
 # 9. Pętle while i for
 # 10. Instrukcje break, continue, return
