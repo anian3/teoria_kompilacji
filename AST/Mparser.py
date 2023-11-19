@@ -208,16 +208,19 @@ def p_expression_ifx(p):
 def p_expression_loop(p):
     """ loop : FOR ID '=' range inloop
               | WHILE '(' expression ')' inloop """
-    if p[1] == 'FOR':
+    if p[1] == 'for':
         p[0] = ForLoopExpr(p[2], p[4], p[5])
-    elif p[1] == 'WHILE':
+    elif p[1] == 'while':
         p[0] = WhileLoopExpr(p[3], p[5])
 
 
 def p_inloop(p):
     """ inloop : '{' statement '}'
                 | statement """
-    p[0] = GroupExpr(p[1])
+    if len(p) > 2:
+        p[0] = GroupExpr(p[2])
+    else:
+        p[0] = GroupExpr(p[1])
 
 
 def p_inloop_extra(p):
@@ -254,12 +257,8 @@ def p_expression_group(p):
 
 # 13. Tablice oraz ich zakresy
 def p_expression_range(p):
-    """ range : INTNUM ':' INTNUM
-            | ID ':' ID
-            | ID ':' INTNUM
-            | INTNUM ':' ID """
+    """ range : expression ':' expression """
     p[0] = RangeExpr(p[1], p[3])
-
 
 def p_table(p):
     """ expression : expression ',' expression addrow """

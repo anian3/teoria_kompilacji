@@ -107,7 +107,7 @@ class ElseExpr(Node):
 @dataclass
 class RangeExpr(Node):
     func = "RANGE"
-    startVal: Any
+    startVal: Node
     endVal: Any
 
 

@@ -127,6 +127,19 @@ class TreePrinter:
         self.startVal.printTree(indent + 1)
         self.endVal.printTree(indent + 1)
 
+    @addToClass(AST.GroupExpr)
+    def printTree(self, indent=0):
+        self.val.printTree(indent)
+
+    @addToClass(AST.ListExpr)
+    def printTree(self, indent=0):
+        self.val1.printTree(indent)
+        self.val2.printTree(indent)
+
+    @addToClass(AST.ListValueExpr)
+    def printTree(self, indent=0):
+        self.val.printTree(indent)
+
     @addToClass(AST.Error)
     def printTree(self):
         print(self.message)
