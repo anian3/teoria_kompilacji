@@ -64,7 +64,7 @@ class CompExpression(Node):
 
 @dataclass
 class TransposeExpression(Node):
-    """ Transpozycja macierzy i negacja unarna """
+    """ Transpozycja macierzy """
     op: Any
     value: Any
 
@@ -80,8 +80,7 @@ class UMinExpression(Node):
 @dataclass
 class AssignExpr(Node):
     op: Any
-    # left: Any
-    left: str
+    left: Any
     right: Any
 
 
@@ -92,6 +91,17 @@ class MatrixInitFuncExpr(Node):
 
 
 # INSTRUKCJE WARUNKOWE IF-ELSE
+@dataclass
+class IfExpr(Node):
+    func = "IF"
+    condition: Any
+    block: Any
+
+@dataclass
+class ElseExpr(Node):
+    func = "ELSE"
+    block: Any
+
 
 # PĘTLE WHILE / FOR
 @dataclass
@@ -141,11 +151,24 @@ class PrintExpr(Node):
 
 
 # INSTRUKCJE ZŁOŻONE
+@dataclass
+class GroupExpr(Node):
+    val: Any
+
 
 # TABLICE ORAZ ICH ZAKRESY
+@dataclass
+class ListExpr(Node):
+    val1: Any
+    val2: Any
+
+
+@dataclass
+class ListValueExpr(Node):
+    val: Any
 
 
 # ERROR
+@dataclass
 class Error(Node):
-    def __init__(self):
-        pass
+    message: str

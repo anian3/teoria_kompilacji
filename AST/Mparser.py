@@ -34,7 +34,6 @@ def p_error(p):
 # Początek
 def p_start(p):
     """ start : statements """
-    # p[0] = p[1]
     p[0] = Program(p[1])
 
 
@@ -61,7 +60,6 @@ def p_statement(p):
 # 0.
 def p_expression_id(p):
     """ expression : ID """
-    # print('Calling id: ' + p[1])
     p[0] = Variable(p[1])
 
 
@@ -175,7 +173,7 @@ def p_expression_matrix_values(p):
 
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
-    """ expression : ID '=' expression """
+    """ expression : expression '=' expression """
     p[0] = AssignExpr(p[2], p[1], p[3])
 
 
@@ -191,6 +189,10 @@ def p_expression_assign(p):
 def p_expression_if(p):
     """ condition : IF expression statement ifx
                     | IF '(' expression ')' statement ifx """
+    if len(p) < 5:
+        p[0] = IfExpr(p[1], p[2])
+    else:
+        p[0] = IfExpr(p[2], p[4])
 
 
 def p_expression_ifx(p):
@@ -198,7 +200,7 @@ def p_expression_ifx(p):
             | ELSE IF expression ifx
             | ELSE IF '(' expression ')' ifx
             | statement """
-    p[0] = p[1]
+    p[0] = ElseExpr(p[2])
 
 
 # 9. Pętle while i for
@@ -215,6 +217,7 @@ def p_expression_loop(p):
 def p_inloop(p):
     """ inloop : '{' statement '}'
                 | statement """
+    p[0] = GroupExpr(p[1])
 
 
 def p_inloop_extra(p):
@@ -246,7 +249,7 @@ def p_expression_group(p):
     """ expression : '(' expression ')'
                    | '[' expression ']'
                    | '{' expression '}' """
-    p[0] = p[2]
+    p[0] = GroupExpr(p[2])
 
 
 # 13. Tablice oraz ich zakresy
@@ -260,12 +263,12 @@ def p_expression_range(p):
 
 def p_table(p):
     """ expression : expression ',' expression addrow """
-    p[0] = [p[1], p[3]]
+    p[0] = ListExpr(p[1], p[3])
 
 
 def p_addrow(p):
     """ addrow : ',' expression """
-    p[0] = p[2]
+    p[0] = ListValueExpr(p[2])
 
 
 parser = yacc.yacc()
