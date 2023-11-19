@@ -15,7 +15,7 @@ precedence = (
     ("nonassoc", ':'),
     ("left", '+', '-', 'DOTADD', 'DOTSUB'),
     ("left", 'DOTMUL', 'DOTDIV', '*', '/'),
-    ("right", 'UMINUS'),
+    ("right", 'UMINUS', "'"),
     ("left", '(', ')', '[', ']', '{', '}')
 )
 
@@ -62,10 +62,7 @@ def p_statement(p):
 def p_expression_id(p):
     """ expression : ID """
     # print('Calling id: ' + p[1])
-    if p[1] in names:
-        p[0] = Variable(p[1])
-    else:
-        raise SyntaxError("Unknown id")
+    p[0] = Variable(p[1])
 
 
 def p_expression_string(p):
@@ -120,9 +117,7 @@ def p_expression_uminus(p):
 # 4. Transpozycja macierzy
 def p_expression_transpose(p):
     """ expression : ID "'" """
-    if p[1] not in names:
-        raise SyntaxError("Unknown matrix id")
-    p[0] = TransposeExpression(p[1], p[2])
+    p[0] = TransposeExpression(p[2], p[1])
 
 
 # 5. Inicjalizacja macierzy konkretnymi wartościami
@@ -213,7 +208,7 @@ def p_expression_loop(p):
               | WHILE '(' expression ')' inloop """
     if p[1] == 'FOR':
         p[0] = ForLoopExpr(p[2], p[4], p[5])
-    else:
+    elif p[1] == 'WHILE':
         p[0] = WhileLoopExpr(p[3], p[5])
 
 

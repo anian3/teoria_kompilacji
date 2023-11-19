@@ -58,7 +58,7 @@ class TreePrinter:
     @addToClass(AST.TransposeExpression)
     def printTree(self, indent=0):
         print("  " * indent + "TRANSPOSE")
-        self.value.printTree(indent + 1)
+        print("  " * (indent+1) + str(self.value))
 
     @addToClass(AST.UMinExpression)
     def printTree(self, indent=0):
@@ -67,53 +67,53 @@ class TreePrinter:
 
     @addToClass(AST.AssignExpr)
     def printTree(self, indent=0):
-        print(" " * indent + "=")
+        print("  " * indent + "=")
         # self.left.printTree(indent + 1)
-        print(" " * (indent+1) + self.left)
+        print("  " * (indent+1) + self.left)
         self.right.printTree(indent + 2)
 
     @addToClass(AST.MatrixInitFuncExpr)
     def printTree(self, indent=0):
-        print(" " * indent + str(self.func))
-        print(" " * (indent+1) + str(self.size))
+        print("  " * indent + str(self.func))
+        print("  " * (indent+1) + str(self.size))
 
     @addToClass(AST.ForLoopExpr)
     def printTree(self, indent=0):
-        print(" " * indent + "FOR")
-        print(" " * (indent + 1) + f"{self.loop_variable}")
+        print("  " * indent + "FOR")
+        print("  " * (indent + 1) + f"{self.loop_variable}")
         self.range_expr.printTree(indent + 2)
         self.body.printTree(indent + 2)
 
     @addToClass(AST.WhileLoopExpr)
     def printTree(self, indent=0):
-        print(" " * indent + "WHILE")
-        print(" " * (indent + 1) + f"{self.condition}")
+        print("  " * indent + "WHILE")
+        print("  " * (indent + 1) + f"{self.condition}")
         self.body.printTree(indent + 2)
 
     @addToClass(AST.BreakExpr)
     def printTree(self, indent=0):
-        print(" " * indent + self.func)
+        print("  " * indent + self.func)
 
     @addToClass(AST.ContinueExpr)
     def printTree(self, indent=0):
-        print(" " * indent + self.func)
+        print("  " * indent + self.func)
 
     @addToClass(AST.ReturnExpr)
     def printTree(self, indent=0):
-        print(" " * indent + self.func)
+        print("  " * indent + self.func)
         self.val.printTree(indent+1)
 
     @addToClass(AST.PrintExpr)
     def printTree(self, indent=0):
-        print(" " * indent + self.func)
+        print("  " * indent + self.func)
         if isinstance(self.val, str):
-            print(" " * (indent + 1) + f'"{self.val}"')
+            print("  " * (indent + 1) + f'"{self.val}"')
         else:
             self.val.printTree(indent + 1)
 
     @addToClass(AST.RangeExpr)
     def printTree(self, indent=0):
-        print(" " * indent + self.func)
+        print("  " * indent + self.func)
         self.startVal.printTree(indent + 1)
         self.endVal.printTree(indent + 1)
 
