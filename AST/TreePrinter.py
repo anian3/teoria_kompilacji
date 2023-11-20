@@ -15,7 +15,7 @@ class TreePrinter:
     @addToClass(AST.Program)
     def printTree(self, indent=0):
         for statement in self.statements:
-            statement.printTree(indent + 1)
+            statement.printTree(indent)
 
     @addToClass(AST.Node)
     def printTree(self, indent=0):
@@ -75,6 +75,25 @@ class TreePrinter:
     def printTree(self, indent=0):
         print("  " * indent + str(self.func))
         print("  " * (indent+1) + str(self.size))
+
+    @addToClass(AST.MatrixInitWithValues)
+    def printTree(self, indent=0):
+        print("  " * indent + "VECTOR")
+        for row in self.matrix_rows:
+            row.printTree(indent+1)
+
+    @addToClass(AST.MatrixRow)
+    def printTree(self, indent=0):
+        print("  " * indent + "VECTOR")
+        for value in self.value:
+            value.printTree(indent + 1)
+
+    @addToClass(AST.ListInit)
+    def printTree(self, indent=0):
+        print("  " * indent + "LIST")
+        for value in self.value:
+            value.printTree(indent + 1)
+
 
     @addToClass(AST.IfExpr)
     def printTree(self, indent=0):
@@ -139,14 +158,6 @@ class TreePrinter:
     def printTree(self, indent=0):
         self.val.printTree(indent)
 
-    @addToClass(AST.ListExpr)
-    def printTree(self, indent=0):
-        self.val1.printTree(indent)
-        self.val2.printTree(indent)
-
-    @addToClass(AST.ListValueExpr)
-    def printTree(self, indent=0):
-        self.val.printTree(indent)
 
     @addToClass(AST.Error)
     def printTree(self):

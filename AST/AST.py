@@ -11,7 +11,6 @@ class Program(Node):
     statements: List[Any]
 
 
-
 # ZMIENNE
 
 @dataclass
@@ -90,6 +89,15 @@ class MatrixInitFuncExpr(Node):
     func: Any
     size: int
 
+@dataclass
+class MatrixRow(Node):
+    value: List[Any]
+
+
+@dataclass
+class MatrixInitWithValues(Node):
+    matrix_rows: List[MatrixRow]
+
 
 # INSTRUKCJE WARUNKOWE IF-ELSE
 @dataclass
@@ -166,16 +174,10 @@ class GroupExpr(Node):
 
 
 # TABLICE ORAZ ICH ZAKRESY
-@dataclass
-class ListExpr(Node):
-    val1: Any
-    val2: Any
-
 
 @dataclass
-class ListValueExpr(Node):
-    val: Any
-
+class ListInit(Node):
+    value: List[Any]
 
 # ERROR
 @dataclass

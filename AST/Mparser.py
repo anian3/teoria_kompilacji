@@ -121,7 +121,7 @@ def p_expression_transpose(p):
 # 5. Inicjalizacja macierzy konkretnymi wartościami
 def p_matrix_initialization(p):
     """ expression : '[' matrix_rows ']' """
-    p[0] = p[2]
+    p[0] = MatrixInitWithValues(p[2])
 
 
 def p_matrix_rows(p):
@@ -136,7 +136,7 @@ def p_matrix_rows_multiple(p):
 
 def p_matrix_row(p):
     """ matrix_row : '['  matrix_row_values ']' """
-    p[0] = p[2]
+    p[0] = MatrixRow(p[2])
 
 
 def p_matrix_row_values(p):
@@ -204,6 +204,7 @@ def p_expression_ifx(p):
     else:
         p[0] = ElseExpr("ELSE", p[2])
 
+
 # 9. Pętle while i for
 # 10. Instrukcje break, continue, return
 def p_expression_loop(p):
@@ -251,7 +252,6 @@ def p_expression_print(p):
 # 12. Instrukcje złożone
 def p_expression_group(p):
     """ expression : '(' expression ')'
-                   | '[' expression ']'
                    | '{' expression '}' """
     p[0] = GroupExpr(p[2])
 
@@ -261,14 +261,19 @@ def p_expression_range(p):
     """ range : expression ':' expression """
     p[0] = RangeExpr(p[1], p[3])
 
-def p_table(p):
-    """ expression : expression ',' expression addrow """
-    p[0] = ListExpr(p[1], p[3])
+
+def p_expression_list(p):
+    """ expression : '[' list_values ']' """
+    p[0] = ListInit(p[2])
 
 
-def p_addrow(p):
-    """ addrow : ',' expression """
-    p[0] = ListValueExpr(p[2])
+def p_list_values_multiple(p):
+    """ list_values : expression
+                    | list_values ',' expression """
+    if len(p) > 2:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
 
 
 parser = yacc.yacc()
