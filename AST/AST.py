@@ -168,12 +168,6 @@ class PrintExpr(Node):
     val: Any
 
 
-# INSTRUKCJE ZŁOŻONE
-@dataclass
-class GroupExpr(Node):
-    val: Any
-
-
 # TABLICE ORAZ ICH ZAKRESY
 
 @dataclass

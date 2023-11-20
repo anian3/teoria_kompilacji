@@ -153,10 +153,6 @@ class TreePrinter:
         self.startVal.printTree(indent + 1)
         self.endVal.printTree(indent + 1)
 
-    @addToClass(AST.GroupExpr)
-    def printTree(self, indent=0):
-        self.val.printTree(indent)
-
     @addToClass(AST.IndexRef)
     def printTree(self, indent=0):
         for num in self.value:

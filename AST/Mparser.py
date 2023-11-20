@@ -10,13 +10,10 @@ tokens = scanner.tokens
 precedence = (
     ("nonassoc", 'IF'),
     ("nonassoc", 'ELSE'),
-    ("nonassoc", '=', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN', '<', '>', 'LESSEQ', 'MOREEQ', 'NOTEQ',
-     'EQUAL'),
-    ("nonassoc", ':'),
+    ("nonassoc", '<', '>', 'LESSEQ', 'MOREEQ', 'NOTEQ', 'EQUAL'),
     ("left", '+', '-', 'DOTADD', 'DOTSUB'),
     ("left", 'DOTMUL', 'DOTDIV', '*', '/'),
-    ("right", 'UMINUS', "'"),
-    ("left", '(', ')', '[', ']', '{', '}')
+    ("right", 'UMINUS', "'")
 )
 
 # Słownik nazw zmiennych
@@ -49,6 +46,8 @@ def p_statements(p):
 def p_statement(p):
     """ statement : expression ';'
                   | '{' statements '}'
+                  | printInstruction ';'
+                  | assignmentInstruction ';'
                   | loop
                   | condition """
     if len(p) == 3 and p[1] == '{':
@@ -187,7 +186,7 @@ def p_expression_assign(p):
 
 # 8. Instrukcja warunkowa if-else
 def p_expression_if(p):
-    """ condition : IF expression statement ifx
+    """ condition : IF expression statement
                     | IF '(' expression ')' statements ifx """
     if len(p) < 5:
         p[0] = IfExpr(p[1], p[2], p[3])
@@ -208,21 +207,12 @@ def p_expression_ifx(p):
 # 9. Pętle while i for
 # 10. Instrukcje break, continue, return
 def p_expression_loop(p):
-    """ loop : FOR ID '=' range inloop
-              | WHILE '(' expression ')' inloop """
+    """ loop : FOR ID '=' range statement
+              | WHILE '(' expression ')' statement """
     if p[1] == 'for':
         p[0] = ForLoopExpr(p[2], p[4], p[5])
     elif p[1] == 'while':
         p[0] = WhileLoopExpr(p[3], p[5])
-
-
-def p_inloop(p):
-    """ inloop : '{' statement '}'
-                | statement """
-    if len(p) > 2:
-        p[0] = GroupExpr(p[2])
-    else:
-        p[0] = GroupExpr(p[1])
 
 
 def p_inloop_extra(p):
@@ -245,15 +235,14 @@ def p_expression_extra(p):
 
 # 11. Instrukcja print
 def p_expression_print(p):
-    """ expression : PRINT expression """
+    """ printInstruction : PRINT expression """
     p[0] = PrintExpr(p[2])
 
 
 # 12. Instrukcje złożone
 def p_expression_group(p):
-    """ expression : '(' expression ')'
-                   | '{' expression '}' """
-    p[0] = GroupExpr(p[2])
+    """ expression : '(' expression ')' """
+    p[0] = p[2]
 
 
 # 13. Tablice oraz ich zakresy
