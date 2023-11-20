@@ -58,7 +58,7 @@ class TreePrinter:
     @addToClass(AST.TransposeExpression)
     def printTree(self, indent=0):
         print("  " * indent + "TRANSPOSE")
-        print("  " * (indent+1) + str(self.value))
+        print("  " * (indent + 1) + str(self.value))
 
     @addToClass(AST.UMinExpression)
     def printTree(self, indent=0):
@@ -69,18 +69,18 @@ class TreePrinter:
     def printTree(self, indent=0):
         print("  " * indent + self.op)
         self.left.printTree(indent + 1)
-        self.right.printTree(indent + 2)
+        self.right.printTree(indent + 1)
 
     @addToClass(AST.MatrixInitFuncExpr)
     def printTree(self, indent=0):
         print("  " * indent + str(self.func))
-        print("  " * (indent+1) + str(self.size))
+        print("  " * (indent + 1) + str(self.size))
 
     @addToClass(AST.MatrixInitWithValues)
     def printTree(self, indent=0):
         print("  " * indent + "VECTOR")
         for row in self.matrix_rows:
-            row.printTree(indent+1)
+            row.printTree(indent + 1)
 
     @addToClass(AST.MatrixRow)
     def printTree(self, indent=0):
@@ -93,7 +93,6 @@ class TreePrinter:
         print("  " * indent + "LIST")
         for value in self.value:
             value.printTree(indent + 1)
-
 
     @addToClass(AST.IfExpr)
     def printTree(self, indent=0):
@@ -138,7 +137,7 @@ class TreePrinter:
     @addToClass(AST.ReturnExpr)
     def printTree(self, indent=0):
         print("  " * indent + self.func)
-        self.val.printTree(indent+1)
+        self.val.printTree(indent + 1)
 
     @addToClass(AST.PrintExpr)
     def printTree(self, indent=0):
@@ -158,14 +157,30 @@ class TreePrinter:
     def printTree(self, indent=0):
         self.val.printTree(indent)
 
+    @addToClass(AST.IndexRef)
+    def printTree(self, indent=0):
+        for num in self.value:
+            print("  " * indent + str(num))
+
+    @addToClass(AST.MatrixIndexRef)
+    def printTree(self, indent=0):
+        print("  " * indent + 'REF')
+        print("  " * (indent + 1) + str(self.matrix))
+        self.indices.printTree(indent + 1)
+
+    # @addToClass(AST.ListIndex)
+    # def printTree(self, indent=0):
+    #     print("  " * indent + 'REF')
+    #     self.list.printTree(indent + 1)
+    #     print("  " * (indent + 1) + str(self.index))
+    #
+    # @addToClass(AST.MatrixIndex)
+    # def printTree(self, indent=0):
+    #     print("  " * indent + 'REF')
+    #     self.matrix.printTree(indent + 1)
+    #     print("  " * (indent + 1) + str(self.row_index))
+    #     print("  " * (indent + 1) + str(self.column_index))
 
     @addToClass(AST.Error)
     def printTree(self):
         print(self.message)
-
-
-
-
-
-
-

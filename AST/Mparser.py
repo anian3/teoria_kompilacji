@@ -157,18 +157,18 @@ def p_expression_matrix_special(p):
     p[0] = MatrixInitFuncExpr(p[1], p[3])
 
 
-def p_expression_matrix_set_values(p):
-    """ expression : matrix_value '=' expression """
-    if p[1] not in names:
-        raise SyntaxError("Unknown matrix")
-    p[0] = p[8]
-
-
-def p_expression_matrix_values(p):
-    """ matrix_value : ID '[' INTNUM ',' INTNUM ']' """
-    if p[1] not in names:
-        raise SyntaxError("Unknown matrix")
-    p[0] = names[p[1]][p[3]][p[5]]
+# def p_expression_matrix_set_values(p):
+#     """ expression : matrix_value '=' expression """
+#     if p[1] not in names:
+#         raise SyntaxError("Unknown matrix")
+#     p[0] = p[8]
+#
+#
+# def p_expression_matrix_values(p):
+#     """ matrix_value : ID '[' INTNUM ',' INTNUM ']' """
+#     if p[1] not in names:
+#         raise SyntaxError("Unknown matrix")
+#     p[0] = names[p[1]][p[3]][p[5]]
 
 
 # 7. Instrukcje przypisania
@@ -260,6 +260,20 @@ def p_expression_group(p):
 def p_expression_range(p):
     """ range : expression ':' expression """
     p[0] = RangeExpr(p[1], p[3])
+
+
+def p_index_expr(p):
+    """ index_expr : INTNUM
+                    | index_expr ',' INTNUM """
+    if len(p) == 2:
+        p[0] = [p[1]]
+    else:
+        p[0] = p[1] + [p[3]]
+
+
+def p_matrix_index_ref(p):
+    """ expression : ID '[' index_expr ']' """
+    p[0] = MatrixIndexRef(p[1], IndexRef(p[3]))
 
 
 def p_expression_list(p):

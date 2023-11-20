@@ -89,6 +89,7 @@ class MatrixInitFuncExpr(Node):
     func: Any
     size: int
 
+
 @dataclass
 class MatrixRow(Node):
     value: List[Any]
@@ -178,6 +179,31 @@ class GroupExpr(Node):
 @dataclass
 class ListInit(Node):
     value: List[Any]
+
+
+@dataclass
+class IndexRef(Node):
+    value: List[int]
+
+
+@dataclass
+class MatrixIndexRef(Node):
+    matrix: Any
+    indices: IndexRef
+
+
+# @dataclass
+# class ListIndex(Node):
+#     list: Any
+#     index: int
+#
+#
+# @dataclass
+# class MatrixIndex(Node):
+#     matrix: Any
+#     row_index: int
+#     column_index: int
+
 
 # ERROR
 @dataclass
