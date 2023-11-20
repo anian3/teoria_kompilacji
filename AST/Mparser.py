@@ -172,12 +172,12 @@ def p_expression_matrix_special(p):
 
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
-    """ expression : expression '=' expression """
+    """ assignmentInstruction : expression '=' expression """
     p[0] = AssignExpr(p[2], p[1], p[3])
 
 
 def p_expression_assign(p):
-    """ expression : expression ADDASSIGN expression
+    """ assignmentInstruction : expression ADDASSIGN expression
                    | expression SUBASSIGN expression
                    | expression MULASSIGN expression
                    | expression DIVASSIGN expression """
@@ -186,8 +186,7 @@ def p_expression_assign(p):
 
 # 8. Instrukcja warunkowa if-else
 def p_expression_if(p):
-    """ condition : IF expression statement
-                    | IF '(' expression ')' statements ifx """
+    """ condition : IF expression statement ifx """
     if len(p) < 5:
         p[0] = IfExpr(p[1], p[2], p[3])
     else:
