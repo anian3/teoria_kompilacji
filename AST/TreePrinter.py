@@ -68,7 +68,10 @@ class TreePrinter:
     @addToClass(AST.AssignExpr)
     def printTree(self, indent=0):
         print("  " * indent + self.op)
-        self.left.printTree(indent + 1)
+        if isinstance(self.left, str):
+            print("  " * indent + self.left)
+        else:
+            self.left.printTree(indent + 1)
         self.right.printTree(indent + 1)
 
     @addToClass(AST.MatrixInitFuncExpr)

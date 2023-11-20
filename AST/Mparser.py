@@ -156,23 +156,10 @@ def p_expression_matrix_special(p):
     p[0] = MatrixInitFuncExpr(p[1], p[3])
 
 
-# def p_expression_matrix_set_values(p):
-#     """ expression : matrix_value '=' expression """
-#     if p[1] not in names:
-#         raise SyntaxError("Unknown matrix")
-#     p[0] = p[8]
-#
-#
-# def p_expression_matrix_values(p):
-#     """ matrix_value : ID '[' INTNUM ',' INTNUM ']' """
-#     if p[1] not in names:
-#         raise SyntaxError("Unknown matrix")
-#     p[0] = names[p[1]][p[3]][p[5]]
-
-
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
-    """ assignmentInstruction : expression '=' expression """
+    """ assignmentInstruction : ID '=' expression
+                                | matrix_index_ref '=' expression """
     p[0] = AssignExpr(p[2], p[1], p[3])
 
 
@@ -194,8 +181,7 @@ def p_expression_if(p):
 
 
 def p_expression_ifx(p):
-    """ ifx : ELSE condition
-            | ELSE statement
+    """ ifx : ELSE statement
             | """
     if type(p[2]) == IfExpr:
         p[0] = ElseIfExpr("ElSE IF", p[2])
@@ -208,6 +194,7 @@ def p_expression_ifx(p):
 def p_expression_loop(p):
     """ loop : FOR ID '=' range statement
               | WHILE '(' expression ')' statement """
+    print(p[2])
     if p[1] == 'for':
         p[0] = ForLoopExpr(p[2], p[4], p[5])
     elif p[1] == 'while':
@@ -252,7 +239,7 @@ def p_expression_range(p):
 
 def p_index_expr(p):
     """ index_expr : INTNUM
-                    | index_expr ',' INTNUM """
+                    | INTNUM ',' INTNUM """
     if len(p) == 2:
         p[0] = [p[1]]
     else:
@@ -260,7 +247,7 @@ def p_index_expr(p):
 
 
 def p_matrix_index_ref(p):
-    """ expression : ID '[' index_expr ']' """
+    """ matrix_index_ref : ID '[' index_expr ']' """
     p[0] = MatrixIndexRef(p[1], IndexRef(p[3]))
 
 
