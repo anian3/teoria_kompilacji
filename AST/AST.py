@@ -46,14 +46,6 @@ class BinExpr(Node):
     right: Any
 
 
-@dataclass
-class MatExpr(Node):
-    """ Operacje macierzowe """
-    op: Any
-    left: Any
-    right: Any
-
-
 # WYRAŻENIA RELACYJNE
 @dataclass
 class CompExpression(Node):
@@ -87,7 +79,7 @@ class AssignExpr(Node):
 @dataclass
 class MatrixInitFuncExpr(Node):
     func: Any
-    size: int
+    size: Any
 
 
 @dataclass
@@ -107,13 +99,6 @@ class IfExpr(Node):
     condition: Any
     block: Any
     ifx: Any
-
-
-@dataclass
-class ElseIfExpr(Node):
-    func: str
-    block: Any
-
 
 @dataclass
 class ElseExpr(Node):
@@ -177,26 +162,13 @@ class ListInit(Node):
 
 @dataclass
 class IndexRef(Node):
-    value: List[int]
+    value: List[Any]
 
 
 @dataclass
 class MatrixIndexRef(Node):
     matrix: Any
     indices: IndexRef
-
-
-# @dataclass
-# class ListIndex(Node):
-#     list: Any
-#     index: int
-#
-#
-# @dataclass
-# class MatrixIndex(Node):
-#     matrix: Any
-#     row_index: int
-#     column_index: int
 
 
 # ERROR

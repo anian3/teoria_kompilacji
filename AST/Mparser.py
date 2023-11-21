@@ -50,7 +50,7 @@ def p_statement(p):
                   | assignmentInstruction ';'
                   | loop
                   | condition """
-    if len(p) == 3 and p[1] == '{':
+    if len(p) == 4 and p[1] == '{':
         p[0] = p[2]
     else:
         p[0] = p[1]
@@ -68,6 +68,7 @@ def p_constant(p):
 def p_expression_id(p):
     """ idConstant : ID """
     p[0] = Variable(p[1])
+
 
 def p_expression_string(p):
     """ stringConstant : STRING """
@@ -98,7 +99,7 @@ def p_expression_binop_matrix(p):
                    | expression DOTSUB expression
                    | expression DOTMUL expression
                    | expression DOTDIV expression """
-    p[0] = MatExpr(p[2], p[1], p[3])
+    p[0] = BinExpr(p[2], p[1], p[3])
 
 
 # 2. Wyrażenia relacyjne
@@ -178,6 +179,20 @@ def p_expression_assign(p):
     p[0] = AssignExpr(p[2], p[1], p[3])
 
 
+def p_index_expr(p):
+    """ index_expr : intConstant
+                    | intConstant ',' intConstant """
+    if len(p) == 2:
+        p[0] = [p[1]]
+    else:
+        p[0] = [p[1], p[3]]
+
+
+def p_matrix_index_ref(p):
+    """ matrix_index_ref : idConstant '[' index_expr ']' """
+    p[0] = MatrixIndexRef(p[1], IndexRef(p[3]))
+
+
 # 8. Instrukcja warunkowa if-else
 def p_expression_if(p):
     """ condition : IF expression statement ifx """
@@ -190,19 +205,14 @@ def p_expression_if(p):
 def p_expression_ifx(p):
     """ ifx : ELSE statement
             | """
-    print(p[2])
-    if type(p[2]) == IfExpr:
-        p[0] = ElseIfExpr("ElSE IF", p[2])
-    else:
-        p[0] = ElseExpr("ELSE", p[2])
+    p[0] = ElseExpr("ELSE", p[2])
 
 
 # 9. Pętle while i for
 # 10. Instrukcje break, continue, return
 def p_expression_loop(p):
-    """ loop : FOR ID '=' range statement
+    """ loop : FOR idConstant '=' range statement
               | WHILE '(' expression ')' statement """
-    print(p[2])
     if p[1] == 'for':
         p[0] = ForLoopExpr(p[2], p[4], p[5])
     elif p[1] == 'while':
@@ -218,7 +228,7 @@ def p_inloop_extra(p):
         p[0] = ContinueExpr()
 
 
-def p_expression_extra(p):
+def p_expression_return(p):
     """ expression : RETURN
                     | RETURN expression"""
     if len(p) == 3:
@@ -229,8 +239,12 @@ def p_expression_extra(p):
 
 # 11. Instrukcja print
 def p_expression_print(p):
-    """ printInstruction : PRINT expression """
-    p[0] = PrintExpr(p[2])
+    """ printInstruction : PRINT expression
+                         | PRINT matrix_row_values """
+    if type(p[2]) == list:
+        p[0] = PrintExpr(p[2])
+    else:
+        p[0] = PrintExpr([p[2]])
 
 
 # 12. Instrukcje złożone
@@ -243,34 +257,6 @@ def p_expression_group(p):
 def p_expression_range(p):
     """ range : expression ':' expression """
     p[0] = RangeExpr(p[1], p[3])
-
-
-def p_index_expr(p):
-    """ index_expr : intConstant
-                    | intConstant ',' intConstant """
-    if len(p) == 2:
-        p[0] = [p[1]]
-    else:
-        p[0] = p[1] + [p[3]]
-
-
-def p_matrix_index_ref(p):
-    """ matrix_index_ref : idConstant '[' index_expr ']' """
-    p[0] = MatrixIndexRef(p[1], IndexRef(p[3]))
-
-
-def p_expression_list(p):
-    """ expression : '[' list_values ']' """
-    p[0] = ListInit(p[2])
-
-
-def p_list_values_multiple(p):
-    """ list_values : expression
-                    | list_values ',' expression """
-    if len(p) > 2:
-        p[0] = p[1] + [p[3]]
-    else:
-        p[0] = [p[1]]
 
 
 parser = yacc.yacc()
