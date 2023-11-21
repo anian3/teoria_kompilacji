@@ -156,11 +156,6 @@ class PrintExpr(Node):
 # TABLICE ORAZ ICH ZAKRESY
 
 @dataclass
-class ListInit(Node):
-    value: List[Any]
-
-
-@dataclass
 class IndexRef(Node):
     value: List[Any]
 
