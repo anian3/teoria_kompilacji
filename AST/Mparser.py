@@ -57,23 +57,30 @@ def p_statement(p):
 
 
 # 0.
+def p_constant(p):
+    """ expression : idConstant
+                | intConstant
+                | stringConstant
+                | floatConstant """
+    p[0] = p[1]
+
+
 def p_expression_id(p):
-    """ expression : ID """
+    """ idConstant : ID """
     p[0] = Variable(p[1])
 
-
 def p_expression_string(p):
-    """expression : STRING """
+    """ stringConstant : STRING """
     p[0] = String(p[1])
 
 
 def p_expression_int(p):
-    """expression : INTNUM """
+    """ intConstant : INTNUM """
     p[0] = IntNum(p[1])
 
 
 def p_expression_float(p):
-    """expression : FLOATNUM"""
+    """ floatConstant : FLOATNUM"""
     p[0] = FloatNum(p[1])
 
 
@@ -113,7 +120,7 @@ def p_expression_uminus(p):
 
 # 4. Transpozycja macierzy
 def p_expression_transpose(p):
-    """ expression : ID "'" """
+    """ expression : idConstant "'" """
     p[0] = TransposeExpression(p[2], p[1])
 
 
@@ -150,15 +157,15 @@ def p_matrix_row_values_multiple(p):
 
 # 6. Macierzowe funkcje specjalne
 def p_expression_matrix_special(p):
-    """ expression : ZEROS '(' INTNUM ')'
-                    | EYE '(' INTNUM ')'
-                    | ONES '(' INTNUM ')' """
+    """ expression : ZEROS '(' intConstant ')'
+                    | EYE '(' intConstant ')'
+                    | ONES '(' intConstant ')' """
     p[0] = MatrixInitFuncExpr(p[1], p[3])
 
 
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
-    """ assignmentInstruction : ID '=' expression
+    """ assignmentInstruction : idConstant '=' expression
                                 | matrix_index_ref '=' expression """
     p[0] = AssignExpr(p[2], p[1], p[3])
 
@@ -183,6 +190,7 @@ def p_expression_if(p):
 def p_expression_ifx(p):
     """ ifx : ELSE statement
             | """
+    print(p[2])
     if type(p[2]) == IfExpr:
         p[0] = ElseIfExpr("ElSE IF", p[2])
     else:
@@ -238,8 +246,8 @@ def p_expression_range(p):
 
 
 def p_index_expr(p):
-    """ index_expr : INTNUM
-                    | INTNUM ',' INTNUM """
+    """ index_expr : intConstant
+                    | intConstant ',' intConstant """
     if len(p) == 2:
         p[0] = [p[1]]
     else:
@@ -247,7 +255,7 @@ def p_index_expr(p):
 
 
 def p_matrix_index_ref(p):
-    """ matrix_index_ref : ID '[' index_expr ']' """
+    """ matrix_index_ref : idConstant '[' index_expr ']' """
     p[0] = MatrixIndexRef(p[1], IndexRef(p[3]))
 
 
