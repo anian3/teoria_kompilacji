@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import AST
 
 
 class NodeVisitor(object):
@@ -28,6 +29,10 @@ class NodeVisitor(object):
 
 
 class TypeChecker(NodeVisitor):
+
+    def __init__(self):
+        super().__init__()
+
 
     def visit_BinExpr(self, node):
         # alternative usage,
