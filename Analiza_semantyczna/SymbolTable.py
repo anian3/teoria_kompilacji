@@ -39,8 +39,6 @@ class SymbolTable(object):
         self.symbols = {}
 
     def put(self, name, symbol):  # put variable symbol or fundef under <name> entry
-        if name in self.symbols:
-            raise ValueError(f"Symbol '{name}' is already defined in the current scope")
         self.symbols[name] = symbol
 
     def get(self, name):  # get variable symbol or fundef from <name> entry
@@ -49,6 +47,9 @@ class SymbolTable(object):
             return symbol
         elif self.parent:
             return self.parent.get(name)
+
+    def check_exists(self, name):
+        return self.get(name) is not None
 
     def getParentScope(self):
         return self.parent
