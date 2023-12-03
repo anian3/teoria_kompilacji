@@ -195,9 +195,10 @@ def p_matrix_index_ref(p):
 
 # 8. Instrukcja warunkowa if-else
 def p_expression_if(p):
-    """ condition : IF expression statement ifx """
-    if len(p) < 5:
-        p[0] = IfExpr(p[1], p[2], p[3])
+    """ condition : IF expression statement ifx
+                    | IF expression '{' statement '}' ifx"""
+    if p[3] == '{':
+        p[0] = IfExpr(p[2], p[4], p[6])
     else:
         p[0] = IfExpr(p[2], p[3], p[4])
 
@@ -205,7 +206,10 @@ def p_expression_if(p):
 def p_expression_ifx(p):
     """ ifx : ELSE statement
             | """
-    p[0] = ElseExpr("ELSE", p[2])
+    if len(p) > 2:
+        p[0] = ElseExpr(p[2])
+    else:
+        p[0] = None
 
 
 # 9. Pętle while i for
@@ -220,9 +224,9 @@ def p_expression_loop(p):
 
 
 def p_inloop_extra(p):
-    """ expression : BREAK statement
-                    | CONTINUE statement """
-    if p[1] == "BREAK":
+    """ expression : BREAK
+                    | CONTINUE """
+    if p[1] == "break":
         p[0] = BreakExpr()
     else:
         p[0] = ContinueExpr()

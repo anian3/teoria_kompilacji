@@ -93,7 +93,9 @@ class TreePrinter:
         self.condition.printTree(indent + 1)
         print("  " * indent + "THEN")
         self.block.printTree(indent + 1)
-        self.ifx.printTree(indent)
+        if self.ifx:
+            self.ifx.printTree(indent)
+
 
     @addToClass(AST.ElseExpr)
     def printTree(self, indent=0):
