@@ -167,7 +167,8 @@ def p_expression_matrix_special(p):
 # 7. Instrukcje przypisania
 def p_expression_eq_assign(p):
     """ assignmentInstruction : idConstant '=' expression
-                                | matrix_index_ref '=' expression """
+                            | idConstant '=' matrix_row
+                            | matrix_index_ref '=' expression """
     p[0] = AssignExpr(p[2], p[1], p[3])
 
 
