@@ -122,11 +122,12 @@ class TypeChecker(NodeVisitor):
     def visit_AssignExpr(self, node):
         type1 = self.visit(node.left)
         type2 = self.visit(node.right)
-        if node.left == AST.Variable and node.op == '=':
+
+        if type(node.left) == AST.Variable and node.op == '=':
             self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, type2))
             return type2
         elif node.op in ['ADDASIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN']:
-            if node.left == AST.Variable and self.symbol_table.check_exists(node.left.value):
+            if type(node.left) == AST.Variable and self.symbol_table.check_exists(node.left.value):
                 if type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:
                     return_type = Type.FLOAT if Type.FLOAT in [type1, type2] else Type.INTNUM
                     self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, return_type))
@@ -140,7 +141,7 @@ class TypeChecker(NodeVisitor):
 
     def visit_MatrixInitFuncExpr(self, node):
         type = self.visit(node.size)
-        if node.func in ['ZEROS', 'EYE', 'ONES'] and type == Type.INTNUM:
+        if node.func in ['zeros', 'eye', 'ones'] and type == Type.INTNUM:
             return Type.MATRIX
         self.printError(f"Error in MatrixInitFuncExpr: can't use {node.func} with {type}.")
 
@@ -215,4 +216,3 @@ class TypeChecker(NodeVisitor):
         if (type1 == Type.MATRIX and len(node.IndexRef) == 2) or (type1 == Type.VECTOR and len(node.IndexRef) == 1):
             return Type.FLOAT # dla uproszczenia wszystkie macierze z floatami, można to zmienić
         self.printError("Error in MatrixIndexRef.")
-
