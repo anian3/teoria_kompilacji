@@ -212,7 +212,7 @@ class TypeChecker(NodeVisitor):
 
     def visit_MatrixIndexRef(self, node):
         type1 = self.visit(node.matrix)
-        self.visit(node.IndexRef)
-        if (type1 == Type.MATRIX and len(node.IndexRef) == 2) or (type1 == Type.VECTOR and len(node.IndexRef) == 1):
+        self.visit(node.indices)
+        if (type1 == Type.MATRIX and len(node.indices.value) == 2) or (type1 == Type.VECTOR and len(node.indices.value) == 1):
             return Type.FLOAT # dla uproszczenia wszystkie macierze z floatami, można to zmienić
         self.printError("Error in MatrixIndexRef.")

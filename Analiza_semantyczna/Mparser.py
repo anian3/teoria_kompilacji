@@ -61,7 +61,8 @@ def p_constant(p):
     """ expression : idConstant
                 | intConstant
                 | stringConstant
-                | floatConstant """
+                | floatConstant
+                | matrix_index_ref """
     p[0] = p[1]
 
 
