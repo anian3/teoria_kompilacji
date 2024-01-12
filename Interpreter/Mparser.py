@@ -235,4 +235,4 @@ def p_inloop_extra(p):
         p[0] = ContinueExpr()
 
 
-parser = yacc.yacc()
+# parser = yacc.yacc()

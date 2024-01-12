@@ -3,7 +3,9 @@ from typing import Any, List
 
 
 class Node(object):
-    pass
+    def accept(self, visitor):
+        return visitor.visit(self)
+    # pass
 
 # BŁĄD
 @dataclass
@@ -112,7 +114,6 @@ class ElseExpr(Node):
 # PĘTLE WHILE / FOR
 @dataclass
 class RangeExpr(Node):
-    # func = "RANGE"
     startVal: Node
     endVal: Any
 
@@ -133,19 +134,16 @@ class WhileLoopExpr(Node):
 # INSTRUKCJE: BREAK, CONTINUE, RETURN
 @dataclass
 class BreakExpr(Node):
-    # func = "BREAK"
     pass
 
 
 @dataclass
 class ContinueExpr(Node):
-    # func = "CONTINUE"
     pass
 
 
 @dataclass
 class ReturnExpr(Node):
-    # func = "RETURN"
     val: Any
 
 
