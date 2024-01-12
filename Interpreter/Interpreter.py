@@ -41,7 +41,7 @@ class Interpreter(object):
 
     @when(AST.Variable)
     def visit(self, node):
-        return self.memory. node.value
+        return self.memory.get(node.value)
 
     @when(AST.BinExpr)
     def visit(self, node):
@@ -67,7 +67,8 @@ class Interpreter(object):
 
     @when(AST.AssignExpr)
     def visit(self, node):
-        key = node.left.accept(self)
+        node.left.accept(self)
+        key = node.left.value
         val = node.right.accept(self)
         if node.op == '=':
             self.memory.set(key, val)
@@ -136,15 +137,16 @@ class Interpreter(object):
 
     @when(AST.WhileLoopExpr)
     def visit(self, node):
-        r = None
+        # r = None
         while node.condition.accept(self):
             try:
-                r = node.body.accept(self)
+                for el in node.body:
+                    el.accept(self)
             except BreakException:
                 break
             except ContinueException:
                 continue
-        return r
+        return
 
     @when(AST.BreakExpr)
     def visit(self, node):
@@ -160,7 +162,8 @@ class Interpreter(object):
 
     @when(AST.PrintExpr)
     def visit(self, node):
-        print(node.val)
+        for val in node.val:
+            print(val.accept(self))
 
     @when(AST.IndexRef)
     def visit(self, node):
@@ -177,4 +180,3 @@ class Interpreter(object):
             return M[I[0]]
         else:
             return M[I[0], I[1]]
-
