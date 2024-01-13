@@ -135,6 +135,7 @@ def p_expression_vector(p):
 def p_vector_values(p):
     """ vector_values : vector_values ',' expression
                         | expression
+                        | vector_value
                         | """
     if len(p) == 4:
         p[0] = p[1] + [p[3]]
@@ -146,7 +147,11 @@ def p_vector_values(p):
 
 def p_index_expr(p):
     """ index_expr : intConstant
-                    | intConstant ',' intConstant """
+                    | range
+                    | intConstant ',' intConstant
+                    | range ',' intConstant
+                    | intConstant ',' range
+                    | range ',' range """
     if len(p) == 2:
         p[0] = [p[1]]
     else:

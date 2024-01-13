@@ -15,9 +15,10 @@ class Type(Enum):
 
 
 class Symbol:
-    def __init__(self, name, mtype):
+    def __init__(self, name, mtype, matrix_size=None):
         self.name = name
         self.type = mtype
+        self.matrix_size = matrix_size
 
 
 class VariableSymbol(Symbol):

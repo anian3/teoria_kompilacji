@@ -68,27 +68,54 @@ class Interpreter(object):
     @when(AST.AssignExpr)
     def visit(self, node):
         node.left.accept(self)
-        key = node.left.value
         val = node.right.accept(self)
-        if node.op == '=':
-            self.memory.insert(key, val)
-            return
-        if node.op == "+=":
-            self.memory.set(key, self.memory.get(key) + val)
-            return
-        if node.op == "-=":
-            self.memory.set(key, self.memory.get(key) - val)
-            return
-        if node.op == "*=":
-            self.memory.set(key, self.memory.get(key) * val)
-            return
-        if node.op == "/=":
-            self.memory.set(key, self.memory.get(key) / val)
+        if isinstance(node.left, AST.Variable):
+            key = node.left.value  # tu dodać dla elementu macierzy
+            if node.op == '=':
+                self.memory.insert(key, val)
+                return
+            if node.op == "+=":
+                self.memory.set(key, self.memory.get(key) + val)
+                return
+            if node.op == "-=":
+                self.memory.set(key, self.memory.get(key) - val)
+                return
+            if node.op == "*=":
+                self.memory.set(key, self.memory.get(key) * val)
+                return
+            if node.op == "/=":
+                self.memory.set(key, self.memory.get(key) / val)
+        else:
+            key = node.left.matrix.value
+            M = self.memory.get(key)
+            indices = node.left.indices.accept(self)
+            if len(indices) == 1:
+                prev_value = M[indices[0].value]
+            else:
+                prev_value = M[indices[0].value, indices[1].value]
+            if node.op == '=':
+                val_to_insert = val
+            if node.op == "+=":
+                val_to_insert = prev_value + val
+            if node.op == "-=":
+                val_to_insert = prev_value - val
+            if node.op == "*=":
+                val_to_insert = prev_value * val
+            if node.op == "/=":
+                val_to_insert = prev_value / val
+            if len(indices) == 1:
+                M[indices[0].value] = val_to_insert
+            else:
+                M[indices[0].value, indices[1].value] = val_to_insert
+
 
     @when(AST.MatrixInitFuncExpr)
     def visit(self, node):
-        s = node.size.accept(self)[0].value
-        return operators[node.func](s)
+        s = node.size.accept(self)
+        if len(s) == 1:
+            return operators[node.func](s[0].value)
+        else:
+            return operators[node.func](s[0].value, s[1].value)
 
     @when(AST.VectorValues)
     def visit(self, node):
@@ -184,9 +211,9 @@ class Interpreter(object):
 
     @when(AST.MatrixIndexRef)
     def visit(self, node):
-        M = self.memory.get(node.matrix)
+        M = self.memory.get(node.matrix.value)
         I = node.indices.accept(self)
         if len(I) == 1:
-            return M[I[0]]
+            return M[I[0].value]
         else:
-            return M[I[0], I[1]]
+            return M[I[0].value, I[1].value]

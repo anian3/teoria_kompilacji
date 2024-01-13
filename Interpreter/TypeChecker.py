@@ -72,21 +72,21 @@ class TypeChecker(NodeVisitor):
                 return Type.STRING
             else:
                 self.printError(f"Error in BinOp: wrong types {type1} {type2}.")
-        elif op in ['DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV']:
+        elif op in ['.+', '.-', '.*', './']:
             if type1 == Type.MATRIX and type2 == Type.MATRIX:
-                if len(node.left) == len(node.right) and len(node.left[0]) == len(node.right[0]):
-                    return Type.MATRIX
-                else:
-                    self.printError("Error in matrix BinOp: wrong matrix sizes")
+                # if len(node.left) == len(node.right) and len(node.left[0]) == len(node.right[0]):
+                return Type.MATRIX
+                # else:
+                #     self.printError("Error in matrix BinOp: wrong matrix sizes")
             if type2 == Type.VECTOR and type2 == Type.VECTOR:
-                if len(node.left) == len(node.right):
-                    return Type.VECTOR
-                else:
-                    self.printError("Error in matrix BinOp: wrong vector sizes")
+                # if len(node.left) == len(node.right):
+                return Type.VECTOR
+                # else:
+                #     self.printError("Error in matrix BinOp: wrong vector sizes")
             else:
                 self.printError(f"Error in matrix BinOp: wrong types {type1} {type2}.")
         else:
-            self.printError("Error in BinOp: wrong operand.")
+            self.printError(f"Error in BinOp: wrong operand {op}.")
 
     def visit_CompExpression(self, node):
         type1 = self.visit(node.left)
@@ -214,7 +214,7 @@ class TypeChecker(NodeVisitor):
             self.printError("Error in IndexRef: too many indices.")
             return
         for ind in node.value:
-            if self.visit(ind) != Type.INTNUM:
+            if self.visit(ind) != Type.INTNUM and self.visit(ind) != Type.RANGE:
                 self.printError("Error in IndexRef: indices must be int values.")
         return Type.INTNUM
 
