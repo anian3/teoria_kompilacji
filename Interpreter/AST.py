@@ -5,7 +5,6 @@ from typing import Any, List
 class Node(object):
     def accept(self, visitor):
         return visitor.visit(self)
-    # pass
 
 # BŁĄD
 @dataclass

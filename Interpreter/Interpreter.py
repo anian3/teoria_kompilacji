@@ -29,15 +29,15 @@ class Interpreter(object):
 
     @when(AST.IntNum)
     def visit(self, node):
-        return node.value
+        return int(node.value)
 
     @when(AST.FloatNum)
     def visit(self, node):
-        return node.value
+        return float(node.value)
 
     @when(AST.String)
     def visit(self, node):
-        return node.value
+        return str(node.value)
 
     @when(AST.Variable)
     def visit(self, node):
@@ -71,23 +71,24 @@ class Interpreter(object):
         key = node.left.value
         val = node.right.accept(self)
         if node.op == '=':
-            self.memory.set(key, val)
+            self.memory.insert(key, val)
             return
-        if node.op == "ADDASSIGN":
+        if node.op == "+=":
             self.memory.set(key, self.memory.get(key) + val)
             return
-        if node.op == "SUBASSIGN":
+        if node.op == "-=":
             self.memory.set(key, self.memory.get(key) - val)
             return
-        if node.op == "MULASSIGN":
+        if node.op == "*=":
             self.memory.set(key, self.memory.get(key) * val)
             return
-        if node.op == "DIVASSIGN":
+        if node.op == "/=":
             self.memory.set(key, self.memory.get(key) / val)
 
     @when(AST.MatrixInitFuncExpr)
     def visit(self, node):
-        return operators[node.func](node.size)
+        s = node.size.accept(self)[0].value
+        return operators[node.func](s)
 
     @when(AST.VectorValues)
     def visit(self, node):
@@ -109,7 +110,8 @@ class Interpreter(object):
             for stmt in node.block:
                 stmt.accept(self)
         else:
-            node.ifx.accept(self)
+            if node.ifx is not None:
+                node.ifx.accept(self)
 
     @when(AST.ElseExpr)
     def visit(self, node):
@@ -122,34 +124,42 @@ class Interpreter(object):
 
     @when(AST.ForLoopExpr)
     def visit(self, node):
-        self.memory.push(Memory("ForLoop"))
-        self.memory.insert(node.loop_variable, 0)
         for i in node.range_expr.accept(self):
+            self.memory.push(Memory("ForLoop"))
+            self.memory.insert(node.loop_variable.value, i)
             try:
-                self.memory.set(node.loop_variable, i)
-                for el in node.body:
-                    el.accept(self)
+                if type(node.body) == list:
+                    for el in node.body:
+                        el.accept(self)
+                else:
+                    node.body.accept(self)
             except BreakException:
                 break
             except ContinueException:
                 continue
+            self.memory.pop()
         return
 
     @when(AST.WhileLoopExpr)
     def visit(self, node):
-        # r = None
         while node.condition.accept(self):
+            self.memory.push(Memory("WhileLoop"))
             try:
-                for el in node.body:
-                    el.accept(self)
+                if type(node.body) == list:
+                    for el in node.body:
+                        el.accept(self)
+                else:
+                    node.body.accept(self)
             except BreakException:
                 break
             except ContinueException:
                 continue
+        self.memory.pop()
         return
 
     @when(AST.BreakExpr)
     def visit(self, node):
+        self.memory.pop()
         raise BreakException
 
     @when(AST.ContinueExpr)

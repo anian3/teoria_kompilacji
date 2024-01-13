@@ -68,6 +68,8 @@ class TypeChecker(NodeVisitor):
         if op in ['+', '-', '*', '/']:
             if type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:
                 return Type.FLOAT if Type.FLOAT in [type1, type2] else Type.INTNUM
+            elif type1 == Type.STRING and type2 == Type.INTNUM:
+                return Type.STRING
             else:
                 self.printError(f"Error in BinOp: wrong types {type1} {type2}.")
         elif op in ['DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV']:
@@ -90,12 +92,12 @@ class TypeChecker(NodeVisitor):
         type1 = self.visit(node.left)
         type2 = self.visit(node.right)
         op = node.op
-        if op in ['<', '>', 'MOREEQ', 'LESSEQ']:
+        if op in ['<', '>', '>=', '<=']:
             if type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:
                 return Type.BOOLEAN
             else:
                 self.printError(f"Error in CompExpression: relational operations are not defined for types {type1} {type2}")
-        elif op in ['NOTEQ', 'EQUAL']:
+        elif op in ['!=', '==']:
             if (type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]) or type1 == type2:
                 return Type.BOOLEAN
             else:
@@ -175,11 +177,11 @@ class TypeChecker(NodeVisitor):
         type2 = self.visit(node.endVal)
         if type1 == Type.INTNUM and type2 == Type.INTNUM:
             return Type.RANGE
-        self.printError("Error in RangeExpr: start and end must be int values.")
+        self.printError("Error in RangeExr: start and end must be int values.")
 
     def visit_ForLoopExpr(self, node):
         type1 = self.visit(node.range_expr)
-        if node.loop_variable == AST.Variable and type1 == Type.RANGE:
+        if type(node.loop_variable) == AST.Variable and type1 == Type.RANGE:
             self.symbol_table = self.symbol_table.pushScope("for")
             self.symbol_table.put(node.loop_variable.value, VariableSymbol(node.loop_variable.value, Type.INTNUM)) # tylko pytanie czy w pętli można to modyfikować
             self.visit(node.body)

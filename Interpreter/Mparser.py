@@ -61,6 +61,7 @@ def p_statement(p):
 # Zmienne
 def p_constant(p):
     """ expression : idConstant
+                | groupExpression
                 | intConstant
                 | stringConstant
                 | floatConstant

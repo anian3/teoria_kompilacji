@@ -27,11 +27,17 @@ class MemoryStack:
         return None
 
     def insert(self, name, value):  # inserts into memory stack variable <name> with value <value>
+        for stack in self.memory_stack:
+            if stack.has_key(name):
+                stack.put(name, value)
+                return
         self.memory_stack[-1].put(name, value)
 
     def set(self, name, value):  # sets variable <name> to value <value>
         for memory in reversed(self.memory_stack):
-            memory.put(name, value)
+            if memory.has_key(name):
+                memory.put(name, value)
+                break
         return None
 
     def push(self, memory):  # pushes memory <memory> onto the stack
