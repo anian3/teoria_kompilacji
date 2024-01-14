@@ -73,18 +73,27 @@ class TypeChecker(NodeVisitor):
             else:
                 self.printError(f"Error in BinOp: wrong types {type1} {type2}.")
         elif op in ['.+', '.-', '.*', './']:
-            if type1 == Type.MATRIX and type2 == Type.MATRIX:
-                # if len(node.left) == len(node.right) and len(node.left[0]) == len(node.right[0]):
-                return Type.MATRIX
-                # else:
-                #     self.printError("Error in matrix BinOp: wrong matrix sizes")
-            if type2 == Type.VECTOR and type2 == Type.VECTOR:
-                # if len(node.left) == len(node.right):
-                return Type.VECTOR
-                # else:
-                #     self.printError("Error in matrix BinOp: wrong vector sizes")
+            sizes = [None, None]
+            types = (type1, type2)
+            for i, node_ in enumerate((node.left, node.right)):
+                if type(node_) == AST.Variable:
+                    sizes[i] = self.symbol_table.get(node_.value).matrix_size
+                elif type(node_) == AST.VectorInitWithValues:
+                    if types[i] == Type.VECTOR:
+                        sizes[i] = len(node_.matrix_rows)
+                    else:
+                        sizes[i] = (len(node_.matrix_rows), len(node_.matrix_rows[0].matrix_rows))
+                else:  # func
+                   sizes[i] = node_.size
+            if sizes[0] != sizes[1]:
+                self.printError(f"Error in matrix BinOp: wrong sizes {sizes[0]}, {sizes[1]}.")
             else:
-                self.printError(f"Error in matrix BinOp: wrong types {type1} {type2}.")
+                if type1 == Type.MATRIX and type2 == Type.MATRIX:
+                    return Type.MATRIX
+                if type2 == Type.VECTOR and type2 == Type.VECTOR:
+                    return Type.VECTOR
+                else:
+                    self.printError(f"Error in matrix BinOp: wrong types {type1} {type2} for op {op}.")
         else:
             self.printError(f"Error in BinOp: wrong operand {op}.")
 
@@ -96,7 +105,8 @@ class TypeChecker(NodeVisitor):
             if type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:
                 return Type.BOOLEAN
             else:
-                self.printError(f"Error in CompExpression: relational operations are not defined for types {type1} {type2}")
+                self.printError(
+                    f"Error in CompExpression: relational operations are not defined for types {type1} {type2}")
         elif op in ['!=', '==']:
             if (type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]) or type1 == type2:
                 return Type.BOOLEAN
@@ -123,7 +133,26 @@ class TypeChecker(NodeVisitor):
         type2 = self.visit(node.right)
 
         if type(node.left) == AST.Variable and node.op == '=':
-            self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, type2))
+            if type2 == Type.VECTOR or type2 == Type.MATRIX:  # dla macierzy, do zapisania ich rozmiaru w zmiennej
+                if type(node.right) == AST.MatrixInitFuncExpr:
+                    self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, type2, node.right.size))
+                elif type(node.right) == AST.BinExpr:
+                    size = self.symbol_table.get(
+                        node.right.left.value).matrix_size  # podstawiam rozmiar pierwszego elementu z binExpr
+                    self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, type2, size))
+                elif type(node.right) == AST.VectorInitWithValues:
+                    if type2 == Type.VECTOR:
+                        self.symbol_table.put(node.left.value,
+                                              VariableSymbol(node.left.value, type2, len(node.right.matrix_rows)))
+                    else:
+                        self.symbol_table.put(node.left.value,
+                                              VariableSymbol(node.left.value, type2, [len(node.right.matrix_rows),
+                                                                                      len(node.right.matrix_rows[
+                                                                                              0].matrix_rows)]))
+                else:
+                    self.printError(f"Can't initialize matrix or vector using {type(node.right)}.")
+            else:
+                self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, type2))
             return type2
         elif node.op in ['ADDASIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN']:
             if type(node.left) == AST.Variable and self.symbol_table.check_exists(node.left.value):
@@ -134,7 +163,7 @@ class TypeChecker(NodeVisitor):
                 else:
                     self.printError(f"Error in AssignExpr: operation not defined for types {type1} {type2}.")
             elif type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:  # dla sytuacji 2 += 3
-                    return Type.FLOAT if Type.FLOAT in [type1, type2] else Type.INTNUM
+                return Type.FLOAT if Type.FLOAT in [type1, type2] else Type.INTNUM
             else:
                 self.printError("Error in AssignExpr: variable not defined.")
 
@@ -183,9 +212,10 @@ class TypeChecker(NodeVisitor):
         type1 = self.visit(node.range_expr)
         if type(node.loop_variable) == AST.Variable and type1 == Type.RANGE:
             self.symbol_table = self.symbol_table.pushScope("for")
-            self.symbol_table.put(node.loop_variable.value, VariableSymbol(node.loop_variable.value, Type.INTNUM)) # tylko pytanie czy w pętli można to modyfikować
+            self.symbol_table.put(node.loop_variable.value, VariableSymbol(node.loop_variable.value,
+                                                                           Type.INTNUM))  # tylko pytanie czy w pętli można to modyfikować
             self.visit(node.body)
-            self.symbol_table = self.symbol_table.popScope() # tylko zmienna stworzona w pętli powinna istnieć poza nią
+            self.symbol_table = self.symbol_table.popScope()  # tylko zmienna stworzona w pętli powinna istnieć poza nią
         else:
             self.printError("Error in ForLoopExpr: error in range.")
 
@@ -221,6 +251,7 @@ class TypeChecker(NodeVisitor):
     def visit_MatrixIndexRef(self, node):
         type1 = self.visit(node.matrix)
         self.visit(node.indices)
-        if (type1 == Type.MATRIX and len(node.indices.value) == 2) or (type1 == Type.VECTOR and len(node.indices.value) == 1):
-            return Type.FLOAT # dla uproszczenia wszystkie macierze z floatami, można to zmienić
+        if (type1 == Type.MATRIX and len(node.indices.value) == 2) or (
+                type1 == Type.VECTOR and len(node.indices.value) == 1):
+            return Type.FLOAT  # dla uproszczenia wszystkie macierze z floatami, można to zmienić
         self.printError("Error in MatrixIndexRef.")

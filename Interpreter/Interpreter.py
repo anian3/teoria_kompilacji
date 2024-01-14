@@ -127,7 +127,7 @@ class Interpreter(object):
     @when(AST.VectorInitWithValues)
     def visit(self, node):
         val = []
-        for el in node.value:
+        for el in node.matrix_rows:
             val.append(el.accept(self))
         return np.array(val)
 

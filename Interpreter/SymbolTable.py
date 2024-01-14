@@ -22,8 +22,8 @@ class Symbol:
 
 
 class VariableSymbol(Symbol):
-    def __init__(self, name, mtype):
-        super().__init__(name, mtype)
+    def __init__(self, name, mtype,  matrix_size=None):
+        super().__init__(name, mtype, matrix_size)
 
 
 class FunctionDefinition(Symbol):
