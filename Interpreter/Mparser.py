@@ -100,7 +100,7 @@ def p_expression_binop(p):
                     | expression DOTMUL expression
                     | expression DOTDIV expression
                     """
-    p[0] = BinExpr(p[2], p[1], p[3])
+    p[0] = BinExpr(p[2], p[1], p[3], p.lineno(2))
 
 
 # Wyrażenia relacyjne
@@ -111,25 +111,25 @@ def p_expression_compare(p):
                     | expression NOTEQ expression
                     | expression LESSEQ expression
                     | expression EQUAL expression """
-    p[0] = CompExpression(p[2], p[1], p[3])
+    p[0] = CompExpression(p[2], p[1], p[3], p.lineno(2))
 
 
 # Negacja unarna
 def p_expression_uminus(p):
     """expression : '-' expression %prec UMINUS"""
-    p[0] = UMinExpression(p[1], p[2])
+    p[0] = UMinExpression(p[1], p[2], p.lineno(1))
 
 
 # Transpozycja macierzy
 def p_expression_transpose(p):
     """ expression : idConstant "'" """
-    p[0] = TransposeExpression(p[2], p[1])
+    p[0] = TransposeExpression(p[2], p[1], p.lineno(1))
 
 
 # Macierze
 def p_expression_vector(p):
     """ vector : '['  vector_values ']' """
-    p[0] = VectorInitWithValues(p[2])
+    p[0] = VectorInitWithValues(p[2], p.lineno(1))
 
 
 def p_vector_values(p):
@@ -160,14 +160,14 @@ def p_index_expr(p):
 
 def p_vector_value(p):
     """ vector_value : idConstant '[' index_expr ']'"""
-    p[0] = MatrixIndexRef(p[1], IndexRef(p[3]))
+    p[0] = MatrixIndexRef(p[1], IndexRef(p[3], p.lineno(3)), p.lineno(2))
 
 
 def p_expression_matrix_special(p):
     """ expression : ZEROS '(' index_expr ')'
                     | EYE '(' index_expr ')'
                     | ONES '(' index_expr ')' """
-    p[0] = MatrixInitFuncExpr(p[1], IndexRef(p[3]))
+    p[0] = MatrixInitFuncExpr(p[1], IndexRef(p[3], p.lineno(3)), p.lineno(1))
 
 
 # Instrukcje przypisania
@@ -180,7 +180,7 @@ def p_expression_eq_assign(p):
                               | expression SUBASSIGN expression
                               | expression MULASSIGN expression
                               | expression DIVASSIGN expression  """
-    p[0] = AssignExpr(p[2], p[1], p[3])
+    p[0] = AssignExpr(p[2], p[1], p[3], p.lineno(2))
 
 
 # Instrukcje złożone
@@ -195,21 +195,21 @@ def p_expression_range(p):
                 | idConstant ':' intConstant
                 | idConstant ':' idConstant
                 | intConstant ':' idConstant """
-    p[0] = RangeExpr(p[1], p[3])
+    p[0] = RangeExpr(p[1], p[3], p.lineno(2))
 
 
 # Return / Print
 def p_print(p):
     """ printExpression : PRINT vector_values """
-    p[0] = PrintExpr(p[2])
+    p[0] = PrintExpr(p[2], p.lineno(1))
 
 
 def p_return(p):
     """ returnExpression : RETURN vector_values """
     if len(p) == 3:
-        p[0] = ReturnExpr([p[2]])
+        p[0] = ReturnExpr([p[2]], p.lineno(1))
     else:
-        p[0] = ReturnExpr(None)
+        p[0] = ReturnExpr(None, p.lineno(1))
 
 
 # If-else
@@ -217,9 +217,9 @@ def p_expression_if(p):
     """ condition : IF groupExpression statement  %prec IFX
                   | IF groupExpression statement ELSE statement """
     if len(p) == 4:
-         p[0] = IfExpr(p[2], p[3], None)
+         p[0] = IfExpr(p[2], p[3], None, p.lineno(1))
     else:
-         p[0] = IfExpr(p[2], p[3], ElseExpr(p[5]))
+         p[0] = IfExpr(p[2], p[3], ElseExpr(p[5], p.lineno(4)), p.lineno(1))
 
 
 # Loops
@@ -227,15 +227,16 @@ def p_expression_loop(p):
     """ loop : FOR idConstant '=' range statement
               | WHILE groupExpression statement """
     if p[1] == 'for':
-        p[0] = ForLoopExpr(p[2], p[4], p[5])
+        p[0] = ForLoopExpr(p[2], p[4], p[5], p.lineno(1))
     elif p[1] == 'while':
-        p[0] = WhileLoopExpr(p[2], p[3])
+        p[0] = WhileLoopExpr(p[2], p[3], p.lineno(1))
 
 
 def p_inloop_extra(p):
     """ expression : BREAK
                     | CONTINUE """
     if p[1] == "break":
+        p[0] = BreakExpr()
         p[0] = BreakExpr()
     else:
         p[0] = ContinueExpr()

@@ -49,6 +49,7 @@ class BinExpr(Node):
     op: Any
     left: Any
     right: Any
+    line_number: int
 
 
 # WYRAŻENIA RELACYJNE
@@ -57,6 +58,7 @@ class CompExpression(Node):
     op: Any
     left: Any
     right: Any
+    line_number: int
 
 
 @dataclass
@@ -64,6 +66,7 @@ class TransposeExpression(Node):
     """ Transpozycja macierzy """
     op: Any
     value: Any
+    line_number: int
 
 
 @dataclass
@@ -71,6 +74,7 @@ class UMinExpression(Node):
     """ Negacja unarna """
     op: Any
     value: Any
+    line_number: int
 
 
 # INSTRUKCJE PRZYPISANIA
@@ -79,22 +83,26 @@ class AssignExpr(Node):
     op: Any
     left: Any
     right: Any
+    line_number: int
 
 
 @dataclass
 class MatrixInitFuncExpr(Node):
     func: Any
     size: Any
+    line_number: int
 
 
 @dataclass
 class VectorValues(Node):
     value: List[Any]
+    line_number: int
 
 
 @dataclass
 class VectorInitWithValues(Node):
     matrix_rows: List[VectorValues]
+    line_number: int
 
 
 # INSTRUKCJE WARUNKOWE IF-ELSE
@@ -103,11 +111,13 @@ class IfExpr(Node):
     condition: Any
     block: Any
     ifx: Any
+    line_number: int
 
 
 @dataclass
 class ElseExpr(Node):
     block: Any
+    line_number: int
 
 
 # PĘTLE WHILE / FOR
@@ -115,6 +125,7 @@ class ElseExpr(Node):
 class RangeExpr(Node):
     startVal: Node
     endVal: Any
+    line_number: int
 
 
 @dataclass
@@ -122,12 +133,14 @@ class ForLoopExpr(Node):
     loop_variable: Any
     range_expr: RangeExpr
     body: Any
+    line_number: int
 
 
 @dataclass
 class WhileLoopExpr(Node):
     condition: Any
     body: Any
+    line_number: int
 
 
 # INSTRUKCJE: BREAK, CONTINUE, RETURN
@@ -144,12 +157,14 @@ class ContinueExpr(Node):
 @dataclass
 class ReturnExpr(Node):
     val: Any
+    line_number: int
 
 
 # INSTRUKCJE: PRINT, RETURN
 @dataclass
 class PrintExpr(Node):
     val: Any
+    line_number: int
 
 
 # ZAKRES
@@ -157,10 +172,12 @@ class PrintExpr(Node):
 @dataclass
 class IndexRef(Node):
     value: List[Any]
+    line_number: int
 
 
 @dataclass
 class MatrixIndexRef(Node):
     matrix: Any
     indices: IndexRef
+    line_number: int
 

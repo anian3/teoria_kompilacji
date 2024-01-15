@@ -70,7 +70,7 @@ class Interpreter(object):
         node.left.accept(self)
         val = node.right.accept(self)
         if isinstance(node.left, AST.Variable):
-            key = node.left.value  # tu dodać dla elementu macierzy
+            key = node.left.value
             if node.op == '=':
                 self.memory.insert(key, val)
                 return
@@ -164,7 +164,7 @@ class Interpreter(object):
                 break
             except ContinueException:
                 continue
-            self.memory.pop()
+        self.memory.pop()
         return
 
     @when(AST.WhileLoopExpr)

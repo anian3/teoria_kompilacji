@@ -68,10 +68,10 @@ class TypeChecker(NodeVisitor):
         if op in ['+', '-', '*', '/']:
             if type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:
                 return Type.FLOAT if Type.FLOAT in [type1, type2] else Type.INTNUM
-            elif type1 == Type.STRING and type2 == Type.INTNUM:
+            elif type1 == Type.STRING and type2 == Type.INTNUM and op == '*':
                 return Type.STRING
             else:
-                self.printError(f"Error in BinOp: wrong types {type1} {type2}.")
+                self.printError(f"Error in BinOp: wrong types {type1} {type2} (line: {node.line_number}).")
         elif op in ['.+', '.-', '.*', './']:
             sizes = [None, None]
             types = (type1, type2)
@@ -86,16 +86,16 @@ class TypeChecker(NodeVisitor):
                 else:  # func
                    sizes[i] = node_.size
             if sizes[0] != sizes[1]:
-                self.printError(f"Error in matrix BinOp: wrong sizes {sizes[0]}, {sizes[1]}.")
+                self.printError(f"Error in matrix BinOp: wrong sizes {sizes[0]}, {sizes[1]} (line: {node.line_number}).")
             else:
                 if type1 == Type.MATRIX and type2 == Type.MATRIX:
                     return Type.MATRIX
-                if type2 == Type.VECTOR and type2 == Type.VECTOR:
+                if type1 == Type.VECTOR and type2 == Type.VECTOR:
                     return Type.VECTOR
                 else:
-                    self.printError(f"Error in matrix BinOp: wrong types {type1} {type2} for op {op}.")
+                    self.printError(f"Error in matrix BinOp: wrong types {type1} {type2} for op {op} (line: {node.line_number}).")
         else:
-            self.printError(f"Error in BinOp: wrong operand {op}.")
+            self.printError(f"Error in BinOp: wrong operand {op} (line: {node.line_number}).")
 
     def visit_CompExpression(self, node):
         type1 = self.visit(node.left)
@@ -106,27 +106,27 @@ class TypeChecker(NodeVisitor):
                 return Type.BOOLEAN
             else:
                 self.printError(
-                    f"Error in CompExpression: relational operations are not defined for types {type1} {type2}")
+                    f"Error in CompExpression: relational operations are not defined for types {type1} {type2} (line: {node.line_number})")
         elif op in ['!=', '==']:
             if (type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]) or type1 == type2:
                 return Type.BOOLEAN
             else:
-                self.printError(f"Error in EQUAL / NOTEQ: not defined for types {type1} {type2}.")
+                self.printError(f"Error in EQUAL / NOTEQ: not defined for types {type1} {type2} (line: {node.line_number}).")
         else:
-            self.printError("Error in CompExpression: wrong operand")
+            self.printError(f"Error in CompExpression: wrong operand (line: {node.line_number})")
 
     def visit_TransposeExpression(self, node):
         if node.value == Type.MATRIX and node.op == "'":
             return Type.MATRIX
         else:
-            self.printError("Error in TransposeExpression.")
+            self.printError(f"Error in TransposeExpression (line: {node.line_number}).")
 
     def visit_UMinExpression(self, node):
         type = self.visit(node.value)
         if node.op == "-" and type in [Type.INTNUM, Type.FLOAT, Type.VECTOR, Type.MATRIX]:
             return type
         else:
-            self.printError("Error in UMinExpression.")
+            self.printError(f"Error in UMinExpression (line: {node.line_number}).")
 
     def visit_AssignExpr(self, node):
         type1 = self.visit(node.left)
@@ -150,7 +150,7 @@ class TypeChecker(NodeVisitor):
                                                                                       len(node.right.matrix_rows[
                                                                                               0].matrix_rows)]))
                 else:
-                    self.printError(f"Can't initialize matrix or vector using {type(node.right)}.")
+                    self.printError(f"Can't initialize matrix or vector using {type(node.right)} (line: {node.line_number}).")
             else:
                 self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, type2))
             return type2
@@ -161,11 +161,11 @@ class TypeChecker(NodeVisitor):
                     self.symbol_table.put(node.left.value, VariableSymbol(node.left.value, return_type))
                     return return_type
                 else:
-                    self.printError(f"Error in AssignExpr: operation not defined for types {type1} {type2}.")
+                    self.printError(f"Error in AssignExpr: operation not defined for types {type1} {type2}  (line: {node.line_number}).")
             elif type1 in [Type.INTNUM, Type.FLOAT] and type2 in [Type.INTNUM, Type.FLOAT]:  # dla sytuacji 2 += 3
                 return Type.FLOAT if Type.FLOAT in [type1, type2] else Type.INTNUM
             else:
-                self.printError("Error in AssignExpr: variable not defined.")
+                self.printError(f"Error in AssignExpr: variable not defined line {node.line_number}.")
 
     def visit_MatrixInitFuncExpr(self, node):
         type = self.visit(node.size)
@@ -174,7 +174,7 @@ class TypeChecker(NodeVisitor):
                 return Type.MATRIX
             else:
                 return Type.VECTOR
-        self.printError(f"Error in MatrixInitFuncExpr: can't use {node.func} with {type}.")
+        self.printError(f"Error in MatrixInitFuncExpr: can't use {node.func} with {type} (line: {node.line_number}).")
 
     def visit_VectorValues(self, node):
         return Type.VECTOR
@@ -185,10 +185,10 @@ class TypeChecker(NodeVisitor):
             size = len(node.matrix_rows[0].matrix_rows)
             for row in node.matrix_rows:
                 if self.visit(row) != Type.VECTOR:
-                    self.printError("Error in MatrixInitWithValues: wrong type")
+                    self.printError(f"Error in MatrixInitWithValues: wrong type (line: {node.line_number})")
                     return
                 if len(row.matrix_rows) != size:
-                    self.printError("Error in MatrixInitWithValues: different row lengths")
+                    self.printError(f"Error in MatrixInitWithValues: different row lengths (line: {node.line_number})")
                     return
             return Type.MATRIX
         return Type.VECTOR
@@ -206,7 +206,7 @@ class TypeChecker(NodeVisitor):
         type2 = self.visit(node.endVal)
         if type1 == Type.INTNUM and type2 == Type.INTNUM:
             return Type.RANGE
-        self.printError("Error in RangeExr: start and end must be int values.")
+        self.printError(f"Error in RangeExr: start and end must be int values (line: {node.line_number}).")
 
     def visit_ForLoopExpr(self, node):
         type1 = self.visit(node.range_expr)
@@ -217,7 +217,7 @@ class TypeChecker(NodeVisitor):
             self.visit(node.body)
             self.symbol_table = self.symbol_table.popScope()  # tylko zmienna stworzona w pętli powinna istnieć poza nią
         else:
-            self.printError("Error in ForLoopExpr: error in range.")
+            self.printError(f"Error in ForLoopExpr: error in range (line: {node.line_number}).")
 
     def visit_WhileLoopExpr(self, node):
         self.symbol_table = self.symbol_table.pushScope("while")
@@ -241,11 +241,11 @@ class TypeChecker(NodeVisitor):
 
     def visit_IndexRef(self, node):
         if len(node.value) > 2:
-            self.printError("Error in IndexRef: too many indices.")
+            self.printError(f"Error in IndexRef: too many indices (line: {node.line_number}).")
             return
         for ind in node.value:
             if self.visit(ind) != Type.INTNUM and self.visit(ind) != Type.RANGE:
-                self.printError("Error in IndexRef: indices must be int values.")
+                self.printError(f"Error in IndexRef: indices must be int values (line: {node.line_number}).")
         return Type.INTNUM
 
     def visit_MatrixIndexRef(self, node):
@@ -253,5 +253,5 @@ class TypeChecker(NodeVisitor):
         self.visit(node.indices)
         if (type1 == Type.MATRIX and len(node.indices.value) == 2) or (
                 type1 == Type.VECTOR and len(node.indices.value) == 1):
-            return Type.FLOAT  # dla uproszczenia wszystkie macierze z floatami, można to zmienić
-        self.printError("Error in MatrixIndexRef.")
+            return Type.FLOAT
+        self.printError(f"Error in MatrixIndexRef (line: {node.line_number}).")
